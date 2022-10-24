@@ -20,3 +20,9 @@ export const getAgentFromId = (id, token) =>
 
 export const updateAgentInfo = (token, id, data) =>
   instance.put("/updateAgentInfo", { token, id, data });
+
+export const removeAgent = (token, id) =>
+  instance.post("/removeAgent", { token, id });
+
+export const addNewAgent = (token, data) =>
+  instance.post("/addNewAgent", { token, data });

@@ -21,7 +21,7 @@ const Login = () => {
   };
 
   if (user || token) {
-    return <Navigate to="/admin" />;
+    return <Navigate to="/agents" />;
   }
 
   return (

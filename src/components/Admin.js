@@ -3,7 +3,13 @@ import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
-import { getAgentFromId, getRealtors, updateAgentInfo } from "../api";
+import {
+  addNewAgent,
+  getAgentFromId,
+  getRealtors,
+  removeAgent,
+  updateAgentInfo,
+} from "../api";
 import { AuthContext } from "../context";
 
 const tHeader = [
@@ -51,7 +57,8 @@ const agentFormList = [
 const Admin = () => {
   const { user } = useContext(AuthContext);
   const token = localStorage.getItem("token");
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpenModal1, setIsOpenModal1] = useState(false);
+  const [isOpenModal2, setIsOpenModal2] = useState(false);
 
   const [tableData, setTableData] = useState([]);
   const [refreshData, setRefreshData] = useState({
@@ -94,6 +101,7 @@ const Admin = () => {
   };
 
   const handleUpdate = (id) => {
+    emptyForm();
     setSelectedAgent(null);
     getAgentFromId(id, token).then((res) => {
       let d = res.data.data[0];
@@ -118,7 +126,7 @@ const Admin = () => {
     });
   };
 
-  const handleUpdtFormChange = (e, i) => {
+  const handleFormChange = (e, i) => {
     agentFormList[i].value = e.target.value;
     setAgentForm(agentFormList);
     setToUpdateCol(() => toUpdateCol + 1);
@@ -128,7 +136,7 @@ const Admin = () => {
     e.preventDefault();
     updateAgentInfo(token, selectedAgent, agentForm)
       .then((res) => {
-        //setIsOpen(false);
+        //setIsOpenModal1(false);
         Swal.fire("Success", res.data.message, "success");
         getRealtorsData();
       })
@@ -137,9 +145,44 @@ const Admin = () => {
       });
   };
 
+  const handleRemove = () => {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        removeAgent(token, selectedAgent)
+          .then((res) => {
+            getRealtorsData();
+            setIsOpenModal1(false);
+            Swal.fire("Deleted!", "Agent record has been deleted.", "success");
+          })
+          .catch((res) => {
+            console.log(res);
+          });
+      }
+    });
+  };
+
+  const handleSubmitAddForm = (e) => {
+    e.preventDefault();
+    addNewAgent(token, agentForm).then((res) => {
+      console.log(res);
+      setIsOpenModal2(false);
+      Swal.fire("Success", "New agent successfully added", "success");
+    });
+
+    return false;
+  };
+
   useEffect(() => {
     if (agentForm[0].value) {
-      setIsOpen(true);
+      setIsOpenModal1(true);
     }
   }, [selectedAgent]);
 
@@ -148,6 +191,12 @@ const Admin = () => {
   useEffect(() => {
     getRealtorsData();
   }, []);
+
+  const emptyForm = () => {
+    agentFormList.map((d, i) => {
+      d.value = "";
+    });
+  };
 
   const getRealtorsData = () => {
     setTableData([]);
@@ -171,13 +220,29 @@ const Admin = () => {
 
   return (
     <div>
-      <div className="px-3">
-        <p className="text-4xl font-bold mb-8 text-gray-700"> Agent List</p>
+      <div className="px-3 mb-10">
+        <div className="mb-3 flex mt-10">
+          <div className="flex-1">
+            <p className="text-4xl font-bold text-gray-700"> Agent List</p>
+          </div>
+          <div className="flex-initial">
+            <button
+              onClick={() => {
+                emptyForm();
+                setIsOpenModal2(true);
+              }}
+              className="border bg-emerald-700 text-slate-50 p-2 rounded"
+            >
+              Add New Record
+            </button>
+          </div>
+        </div>
+
         <div className="overflow-x-auto" style={{ maxHeight: "800px" }}>
           <table id="agentTable" className="bg-white rounded shadow w-full">
             <thead>
               <tr>
-                <th className="text-white">#</th>
+                <th className="text-white">Id</th>
                 {tHeader.map((tH, index) => (
                   <th className="text-white px-4 table-cell" key={index}>
                     {tH}
@@ -192,7 +257,7 @@ const Admin = () => {
                     className="border px-4 table-cell cursor-pointer"
                     onClick={() => handleUpdate(t._id)}
                   >
-                    {index + 1}
+                    {t._id}
                   </td>
                   <td className="border px-4 table-cell">{t.email}</td>
                   <td className="border px-4 table-cell">{t.first_name}</td>
@@ -259,8 +324,8 @@ const Admin = () => {
         </div>
       </div>
 
-      <Transition appear show={isOpen} as={Fragment}>
-        <Dialog as="div" onClose={() => setIsOpen(false)}>
+      <Transition appear show={isOpenModal1} as={Fragment}>
+        <Dialog as="div" onClose={() => setIsOpenModal1(false)}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -278,7 +343,7 @@ const Admin = () => {
                 <button
                   style={{ marginTop: "-30px", marginRight: "-20px" }}
                   className="p-2 float-right text-3xl font-medium"
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => setIsOpenModal1(false)}
                 >
                   &times;
                 </button>
@@ -297,7 +362,7 @@ const Admin = () => {
                         </label>
                         <input
                           value={d.value}
-                          onChange={(e) => handleUpdtFormChange(e, i)}
+                          onChange={(e) => handleFormChange(e, i)}
                           type="text"
                           className=" w-full border border-slate-300 rounded-md  focus:outline-none focus:border-sky-500 md:text-sm p-2 bg-gray-100"
                         />
@@ -306,12 +371,77 @@ const Admin = () => {
                   </div>
 
                   <div className="mt-5">
-                    <button className="mr-3 tracking-wider w-200 rounded-md border border-transparent bg-blue-500 py-2 px-4 font-medium text-slate-50 hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                    <button
+                      type="submit"
+                      className="mr-3 tracking-wider w-200 rounded-md border border-transparent bg-blue-500 py-2 px-4 font-medium text-slate-50 hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
                       Update
                     </button>
 
-                    <button className="mr-3 tracking-wider w-200 rounded-md border border-transparent outline outline-1 outline-red-500 py-2 px-4 font-medium text-red-500 hover:text-slate-200 hover:bg-red-500  focus-visible:ring-2 focus-visible:ring-red-500">
+                    <button
+                      type="button"
+                      onClick={handleRemove}
+                      className="mr-3 tracking-wider w-200 rounded-md border border-transparent outline outline-1 outline-red-500 py-2 px-4 font-medium text-red-500 hover:text-slate-200 hover:bg-red-500  focus-visible:ring-2 focus-visible:ring-red-500"
+                    >
                       Remove
+                    </button>
+                  </div>
+                </form>
+              </Dialog.Panel>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      <Transition appear show={isOpenModal2} as={Fragment}>
+        <Dialog as="div" onClose={() => setIsOpenModal2(false)}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leaveFrom="opcity-100 scale-100"
+            leaveTo="opacity-0 scale-95"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-25" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Dialog.Panel className="w-full max-w-3xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <button
+                  style={{ marginTop: "-30px", marginRight: "-20px" }}
+                  className="p-2 float-right text-3xl font-medium"
+                  onClick={() => setIsOpenModal2(false)}
+                >
+                  &times;
+                </button>
+                <Dialog.Title
+                  as="h3"
+                  className="mb-10 text-2xl font-bold leading-6 text-gray-600"
+                >
+                  Add New Agent
+                </Dialog.Title>
+                <form onSubmit={handleSubmitAddForm}>
+                  <div className="grid grid-cols-3 gap-3">
+                    {agentForm.map((d, i) => (
+                      <div key={i}>
+                        <label className="text-sm font-medium ">
+                          {d.name}:
+                        </label>
+                        <input
+                          value={d.value}
+                          onChange={(e) => handleFormChange(e, i)}
+                          type="text"
+                          className=" w-full border border-slate-300 rounded-md  focus:outline-none focus:border-sky-500 md:text-sm p-2 bg-gray-100"
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-5">
+                    <button className="mr-3 tracking-widest w-full rounded-md border border-transparent bg-blue-500 py-2 px-4 font-medium text-slate-50 hover:bg-blue-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                      Submit
                     </button>
                   </div>
                 </form>
