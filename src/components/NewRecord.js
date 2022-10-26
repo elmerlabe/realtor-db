@@ -1,3 +1,4 @@
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
@@ -408,17 +409,32 @@ const NewRecord = () => {
                 type="submit"
                 className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >
-                Submit
+                {agentId !== undefined ? "Save all" : "Submit"}
               </button>
 
               {agentId !== undefined ? (
                 <button
                   type="button"
-                  onClick={handleRemove}
-                  className="mr-4 md:w-40 mt-2 tracking-wider rounded-md border border-transparent outline outline-1 outline-red-500 py-2 px-4 font-medium text-red-500 hover:text-slate-200 hover:bg-red-500  focus-visible:ring-2 focus-visible:ring-red-500"
+                  onClick={() => {
+                    window.location.href = "/agents";
+                  }}
+                  className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-zinc-500 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                  Delete
+                  Cancel
                 </button>
+              ) : null}
+            </div>
+
+            <div className="md:mt-5 md:text-right my-auto">
+              {" "}
+              {agentId !== undefined ? (
+                <a
+                  type="button"
+                  onClick={handleRemove}
+                  className="mr-4 md:w-40 mt-2 text-sm text-red-500 text-decoration-line: underline cursor-pointer"
+                >
+                  Delete this record
+                </a>
               ) : null}
             </div>
           </div>

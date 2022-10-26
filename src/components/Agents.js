@@ -2,6 +2,7 @@ import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context";
 import { getRealtors } from "../api";
 import Swal from "sweetalert2";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const Agents = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -15,6 +16,8 @@ const Agents = ({ children }) => {
     prevPage: 0,
     total: 0,
   });
+  const [isDesc, setIsDesc] = useState(true);
+  const [sort, setSort] = useState("");
 
   const handleChangePage = (e) => {
     if (e === "0" || e === "") return;
@@ -34,14 +37,37 @@ const Agents = ({ children }) => {
     getRealtorsData();
   };
 
+  const handleSorting = (table) => {
+    console.log(table);
+    if (sort === table || sort === "") {
+      setIsDesc(!isDesc);
+    } else {
+      setIsDesc(false);
+    }
+
+    setSort(table);
+  };
+
+  useEffect(() => {
+    getRealtorsData();
+  }, [isDesc, sort]);
+
   useEffect(() => {
     getRealtorsData();
   }, []);
 
   function getRealtorsData() {
-    getRealtors(refreshData.page, refreshData.perPage, token)
+    console.log(isDesc);
+    console.log(sort);
+    getRealtors(
+      token,
+      refreshData.page,
+      refreshData.perPage,
+      sort,
+      Number(isDesc)
+    )
       .then((res) => {
-        //console.log(res);
+        console.log(res);
         setAgentList(res.data.realtors);
         setRefreshData({
           ...refreshData,
@@ -78,6 +104,23 @@ const Agents = ({ children }) => {
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
+            <div className="mb-2 justify-end">
+              <label htmlFor="table-search" className="sr-only">
+                Search
+              </label>
+              <div className="relative">
+                <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
+                  <MagnifyingGlassIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  id="table-search"
+                  className="block p-2 pl-10 w-80 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-indigo-800 focus:border-indigo-800 dark:focus:ring-indigo-800 dark:focus:border-indigo-800"
+                  placeholder="Search for agent information"
+                />
+              </div>
+            </div>
+
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
@@ -86,43 +129,134 @@ const Agents = ({ children }) => {
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Email
+                      <div className="flex items-center">
+                        Email
+                        <button onClick={() => handleSorting("email")}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
                     </th>
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      First Name
+                      <div className="flex items-center">
+                        First Name
+                        <button onClick={() => handleSorting("firstName")}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
                     </th>
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Last Name
+                      <div className="flex items-center">
+                        Last Name
+                        <button onClick={() => handleSorting("lastName")}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
                     </th>
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Office Name
+                      <div className="flex items-center">
+                        Office Name
+                        <button onClick={() => handleSorting("officeName")}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
                     </th>
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Office City
+                      <div className="flex items-center">
+                        Office City
+                        <button onClick={() => handleSorting("officeCity")}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
                     </th>
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Office State
+                      <div className="flex items-center">
+                        Office State
+                        <button onClick={() => handleSorting("officeState")}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
                     </th>
                     <th
                       scope="col"
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
-                      Office Phone
+                      <div className="flex items-center">
+                        Office Phone
+                        <button onClick={() => handleSorting("officePhone")}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
                     </th>
                     <th
                       scope="col"
@@ -161,7 +295,7 @@ const Agents = ({ children }) => {
                           href={`/agents/${agent._id}`}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
-                          Edit<span className="sr-only">, {agent._id}</span>
+                          View<span className="sr-only">, {agent._id}</span>
                         </a>
                       </td>
                     </tr>

@@ -28,13 +28,13 @@ import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 import Agents from "./Agents";
 
 const navigation = [
+  { name: "All Agents", href: "/agents", icon: UsersIcon, current: true },
   {
     name: "Add New Agent",
     href: "/agents/newRecord",
     icon: UserPlusIcon,
     current: false,
   },
-  { name: "Agent Records", href: "/agents", icon: UsersIcon, current: true },
 
   { name: "Settings", href: "/account", icon: Cog8ToothIcon, current: false },
 ];
