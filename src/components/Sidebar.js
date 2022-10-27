@@ -174,7 +174,7 @@ const Sidebar = ({ children }) => {
               <CircleStackIcon className="w-6 h-6 text-white" />
 
               <span className="ml-2 text-lg text-white font-bold">
-                Realtor Database
+                Realtors Database
               </span>
             </div>
             <div className="flex flex-1 flex-col overflow-y-auto">

@@ -38,7 +38,6 @@ const Agents = ({ children }) => {
   };
 
   const handleSorting = (table) => {
-    console.log(table);
     if (sort === table || sort === "") {
       setIsDesc(!isDesc);
     } else {
@@ -57,8 +56,6 @@ const Agents = ({ children }) => {
   }, []);
 
   function getRealtorsData() {
-    console.log(isDesc);
-    console.log(sort);
     getRealtors(
       token,
       refreshData.page,
@@ -67,7 +64,7 @@ const Agents = ({ children }) => {
       Number(isDesc)
     )
       .then((res) => {
-        console.log(res);
+        //console.log(res);
         setAgentList(res.data.realtors);
         setRefreshData({
           ...refreshData,
@@ -83,8 +80,57 @@ const Agents = ({ children }) => {
       });
   }
 
+  function sortTable(n) {
+    let table,
+      rows,
+      switching,
+      i,
+      x,
+      y,
+      shouldSwitch,
+      dir,
+      switchCount = 0;
+    table = document.getElementById("myTable");
+    switching = true;
+    dir = "asc";
+
+    while (switching) {
+      switching = false;
+      rows = table.rows;
+
+      for (i = 1; i < rows.length - 1; i++) {
+        shouldSwitch = false;
+        x = rows[i].getElementsByTagName("TD")[n];
+        y = rows[i + 1].getElementsByTagName("TD")[n];
+
+        if (dir === "asc") {
+          if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        } else if (dir === "desc") {
+          if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+            shouldSwitch = true;
+            break;
+          }
+        }
+      }
+
+      if (shouldSwitch) {
+        rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+        switching = true;
+        switchCount++;
+      } else {
+        if (switchCount === 0 && dir === "asc") {
+          dir = "desc";
+          switching = true;
+        }
+      }
+    }
+  }
+
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
+    <div className="">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
           <h1 className="text-2xl font-bold text-gray-900">Agents</h1>
@@ -122,7 +168,10 @@ const Agents = ({ children }) => {
             </div>
 
             <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-300">
+              <table
+                id="myTable"
+                className="min-w-full divide-y divide-gray-300"
+              >
                 <thead className="bg-gray-50">
                   <tr>
                     <th
@@ -130,27 +179,8 @@ const Agents = ({ children }) => {
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       <div className="flex items-center">
-                        Email
-                        <button onClick={() => handleSorting("email")}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
                         First Name
-                        <button onClick={() => handleSorting("firstName")}>
+                        <button onClick={() => sortTable(0)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="ml-1 w-3 h-3"
@@ -169,7 +199,7 @@ const Agents = ({ children }) => {
                     >
                       <div className="flex items-center">
                         Last Name
-                        <button onClick={() => handleSorting("lastName")}>
+                        <button onClick={() => sortTable(1)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="ml-1 w-3 h-3"
@@ -188,7 +218,7 @@ const Agents = ({ children }) => {
                     >
                       <div className="flex items-center">
                         Office Name
-                        <button onClick={() => handleSorting("officeName")}>
+                        <button onClick={() => sortTable(2)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="ml-1 w-3 h-3"
@@ -206,8 +236,8 @@ const Agents = ({ children }) => {
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       <div className="flex items-center">
-                        Office City
-                        <button onClick={() => handleSorting("officeCity")}>
+                        City
+                        <button onClick={() => sortTable(3)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="ml-1 w-3 h-3"
@@ -225,8 +255,8 @@ const Agents = ({ children }) => {
                       className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                     >
                       <div className="flex items-center">
-                        Office State
-                        <button onClick={() => handleSorting("officeState")}>
+                        State
+                        <button onClick={() => sortTable(4)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="ml-1 w-3 h-3"
@@ -245,7 +275,7 @@ const Agents = ({ children }) => {
                     >
                       <div className="flex items-center">
                         Office Phone
-                        <button onClick={() => handleSorting("officePhone")}>
+                        <button onClick={() => sortTable(5)}>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             className="ml-1 w-3 h-3"
@@ -258,6 +288,47 @@ const Agents = ({ children }) => {
                         </button>
                       </div>
                     </th>
+
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      <div className="flex items-center">
+                        Cell Phone
+                        <button onClick={() => sortTable(6)}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </th>
+
+                    <th
+                      scope="col"
+                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    >
+                      <div className="flex items-center">
+                        Email
+                        <button onClick={() => sortTable(7)}>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="ml-1 w-3 h-3"
+                            aria-hidden="true"
+                            fill="currentColor"
+                            viewBox="0 0 320 512"
+                          >
+                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </th>
+
                     <th
                       scope="col"
                       className="relative py-3.5 pl-3 pr-4 sm:pr-6"
@@ -269,9 +340,6 @@ const Agents = ({ children }) => {
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {agentList.map((agent) => (
                     <tr key={agent._id}>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.email}
-                      </td>
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {agent.firstName}
                       </td>
@@ -290,12 +358,18 @@ const Agents = ({ children }) => {
                       <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                         {agent.officePhone}
                       </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {agent.cellPhone}
+                      </td>
+                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                        {agent.email}
+                      </td>
                       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         <a
                           href={`/agents/${agent._id}`}
                           className="text-indigo-600 hover:text-indigo-900"
                         >
-                          View<span className="sr-only">, {agent._id}</span>
+                          View
                         </a>
                       </td>
                     </tr>
