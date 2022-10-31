@@ -1,8 +1,40 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, Fragment } from "react";
 import { AuthContext } from "../context";
-import { getRealtors } from "../api";
+import { getCities, getRealtors, getStates } from "../api";
 import Swal from "sweetalert2";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import {
+  CheckIcon,
+  ChevronUpDownIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import { Listbox, Transition } from "@headlessui/react";
+
+const States = [
+  { id: 0, name: "Select State" },
+  { id: 1, name: "AK" },
+  { id: 2, name: "AL" },
+  { id: 3, name: "AR" },
+  { id: 4, name: "AZ" },
+  { id: 5, name: "CA" },
+];
+
+const Cities = [
+  { id: 0, name: "-----" },
+  { id: 1, name: "Aaronsburg" },
+  { id: 2, name: "Abbeville" },
+  { id: 3, name: "Abbotsford" },
+  { id: 4, name: "Abbott" },
+  { id: 5, name: "Abbottstown" },
+];
+
+const perPage = [
+  { value: "10", name: "Show 10" },
+  { value: "20", name: "Show 20" },
+  { value: "30", name: "Show 30" },
+  { value: "40", name: "Show 40" },
+  { value: "50", name: "Show 50" },
+  { value: "100", name: "Show 100" },
+];
 
 const Agents = ({ children }) => {
   const { user } = useContext(AuthContext);
@@ -18,6 +50,16 @@ const Agents = ({ children }) => {
   });
   const [isDesc, setIsDesc] = useState(true);
   const [sort, setSort] = useState("");
+
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+
+  const [selectedState, setSelectedState] = useState({
+    id: 0,
+    name: "Select State",
+  });
+  const [selectedCity, setSelectedCity] = useState({ id: 0, name: "-----" });
+  const [selectedPerPage, setSelectedPerPage] = useState(perPage[0]);
 
   const handleChangePage = (e) => {
     if (e === "0" || e === "") return;
@@ -52,8 +94,25 @@ const Agents = ({ children }) => {
   }, [isDesc, sort]);
 
   useEffect(() => {
-    getRealtorsData();
+    getStatesData();
   }, []);
+
+  useEffect(() => {
+    refreshData.page = 1;
+    setSelectedCity({ id: 0, name: "Select City" });
+    getCitiesData();
+  }, [selectedState]);
+
+  useEffect(() => {
+    refreshData.page = 1;
+    getRealtorsData();
+  }, [selectedCity]);
+
+  useEffect(() => {
+    console.log(selectedPerPage);
+    refreshData.perPage = selectedPerPage.value;
+    getRealtorsData();
+  }, [selectedPerPage]);
 
   function getRealtorsData() {
     getRealtors(
@@ -61,7 +120,9 @@ const Agents = ({ children }) => {
       refreshData.page,
       refreshData.perPage,
       sort,
-      Number(isDesc)
+      Number(isDesc),
+      selectedCity.id === 0 ? "" : selectedCity.name,
+      selectedState.id === 0 ? "" : selectedState.name
     )
       .then((res) => {
         //console.log(res);
@@ -78,6 +139,21 @@ const Agents = ({ children }) => {
       .catch((err) => {
         Swal.fire("Error", "Unable to get data!", "error");
       });
+  }
+
+  function getStatesData() {
+    getStates().then((res) => {
+      //console.log(res.data.states);
+      setStates(res.data.states);
+    });
+  }
+
+  function getCitiesData() {
+    getCities(selectedState.id).then((res) => {
+      //console.log(res.data.cities);
+      setCities(res.data.cities);
+      //getRealtorsData();
+    });
   }
 
   function sortTable(n) {
@@ -150,20 +226,190 @@ const Agents = ({ children }) => {
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="mb-2 justify-end">
+            <div className="mb-2 flex">
               <label htmlFor="table-search" className="sr-only">
                 Search
               </label>
-              <div className="relative">
+              <div className="relative mr-5">
                 <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
                   <MagnifyingGlassIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
                 </div>
                 <input
                   type="text"
                   id="table-search"
-                  className="block p-2 pl-10 w-80 text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-indigo-800 focus:border-indigo-800 dark:focus:ring-indigo-800 dark:focus:border-indigo-800"
+                  className="block p-2 pl-10 w-80 text-sm text-gray-900 bg-white-500 rounded-lg border border-gray-300 focus:ring-indigo-800 focus:border-indigo-800 dark:focus:ring-indigo-800 dark:focus:border-indigo-800"
                   placeholder="Search for agent information"
                 />
+              </div>
+
+              <div className="fixed top-0 mr-5 relative text-left w-60 items-center">
+                <Listbox value={selectedState} onChange={setSelectedState}>
+                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                    <span className="block truncate">{selectedState.name}</span>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Listbox.Button>
+                  <Transition
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {states.map((state, index) => (
+                        <Listbox.Option
+                          key={index}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? "bg-amber-100 text-amber-900"
+                                : "text-gray-900"
+                            }`
+                          }
+                          value={state}
+                        >
+                          {({ selected }) => (
+                            <>
+                              <span
+                                className={`block truncate ${
+                                  selected ? "font-medium" : "font-normal"
+                                }`}
+                              >
+                                {state.name}
+                              </span>
+                              {selected ? (
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                                  <CheckIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </Listbox>
+              </div>
+
+              <div className="mr-5 relative text-left w-60 items-center">
+                <Listbox value={selectedCity} onChange={setSelectedCity}>
+                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                    <span className="block truncate">{selectedCity.name}</span>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Listbox.Button>
+                  <Transition
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {cities.map((city, index) => (
+                        <Listbox.Option
+                          key={index}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? "bg-amber-100 text-amber-900"
+                                : "text-gray-900"
+                            }`
+                          }
+                          value={city}
+                        >
+                          {({ selected }) => (
+                            <>
+                              <span
+                                className={`block truncate ${
+                                  selected ? "font-medium" : "font-normal"
+                                }`}
+                              >
+                                {city.name}
+                              </span>
+                              {selected ? (
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                                  <CheckIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </Listbox>
+              </div>
+
+              <div className="mr-5 relative text-left w-30 items-center">
+                <Listbox value={selectedPerPage} onChange={setSelectedPerPage}>
+                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
+                    <span className="block truncate">
+                      {selectedPerPage.name}
+                    </span>
+                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                      <ChevronUpDownIcon
+                        className="h-5 w-5 text-gray-400"
+                        aria-hidden="true"
+                      />
+                    </span>
+                  </Listbox.Button>
+                  <Transition
+                    as={Fragment}
+                    leave="transition ease-in duration-100"
+                    leaveFrom="opacity-100"
+                    leaveTo="opacity-0"
+                  >
+                    <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                      {perPage.map((pPage, index) => (
+                        <Listbox.Option
+                          key={index}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? "bg-amber-100 text-amber-900"
+                                : "text-gray-900"
+                            }`
+                          }
+                          value={pPage}
+                        >
+                          {({ selected }) => (
+                            <>
+                              <span
+                                className={`block truncate ${
+                                  selected ? "font-medium" : "font-normal"
+                                }`}
+                              >
+                                {pPage.value}
+                              </span>
+                              {selected ? (
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
+                                  <CheckIcon
+                                    className="h-5 w-5"
+                                    aria-hidden="true"
+                                  />
+                                </span>
+                              ) : null}
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Transition>
+                </Listbox>
               </div>
             </div>
 
@@ -386,18 +632,20 @@ const Agents = ({ children }) => {
         >
           <div className="hidden sm:block">
             <p className="text-sm text-gray-700">
-              Showing <span className="font-medium">{refreshData.page}</span> to{" "}
-              <span className="font-medium">{refreshData.pages}</span> of{" "}
-              <span className="font-medium">{refreshData.total}</span> results{" "}
-              <span className="text-sm ml-2">
+              Page <span className="font-medium">{refreshData.page}</span> of{" "}
+              <span className="font-medium">{refreshData.pages}</span>
+              <span className="text-sm ml-2 mr-4">
                 Go to page{" "}
                 <input
+                  style={{ width: "60px" }}
                   onChange={(e) => handleChangePage(e.target.value)}
                   type="number"
                   min="1"
-                  className="border w-20 text-left p-1 rounded-md outline-none focus:border-sky-300"
+                  className="border text-left p-1 rounded-md outline-none focus:border-sky-300"
                 />{" "}
               </span>
+              Total results:{" "}
+              <span className="font-medium">{refreshData.total}</span>
             </p>
           </div>
           <div className="flex flex-1 justify-between sm:justify-end">

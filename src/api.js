@@ -4,7 +4,7 @@ export const instance = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
 });
 
-export const getRealtors = (token, page, per_page, sort, isDesc) =>
+export const getRealtors = (token, page, per_page, sort, isDesc, city, state) =>
   instance.post(
     "/getRealtors?page=" +
       page +
@@ -13,7 +13,11 @@ export const getRealtors = (token, page, per_page, sort, isDesc) =>
       "&sort=" +
       sort +
       "&isDesc=" +
-      isDesc,
+      isDesc +
+      "&city=" +
+      city +
+      "&state=" +
+      state,
     { token }
   );
 
@@ -34,3 +38,8 @@ export const removeAgent = (token, id) =>
 
 export const addNewAgent = (token, data) =>
   instance.post("/addNewAgent", { token, data });
+
+export const getStates = () => instance.get("/getStates");
+
+export const getCities = (stateId) =>
+  instance.get("/getCities?stateId=" + stateId);
