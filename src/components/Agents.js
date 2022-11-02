@@ -8,24 +8,8 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { Listbox, Transition } from "@headlessui/react";
-
-const States = [
-  { id: 0, name: "Select State" },
-  { id: 1, name: "AK" },
-  { id: 2, name: "AL" },
-  { id: 3, name: "AR" },
-  { id: 4, name: "AZ" },
-  { id: 5, name: "CA" },
-];
-
-const Cities = [
-  { id: 0, name: "-----" },
-  { id: 1, name: "Aaronsburg" },
-  { id: 2, name: "Abbeville" },
-  { id: 3, name: "Abbotsford" },
-  { id: 4, name: "Abbott" },
-  { id: 5, name: "Abbottstown" },
-];
+import Spinner from "./Spinner";
+import { Navigate } from "react-router-dom";
 
 const perPage = [
   { value: "10", name: "Show 10" },
@@ -48,9 +32,7 @@ const Agents = ({ children }) => {
     prevPage: 0,
     total: 0,
   });
-  const [isDesc, setIsDesc] = useState(true);
-  const [sort, setSort] = useState("");
-
+  const [searchVal, setSearchVal] = useState("");
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
@@ -58,8 +40,12 @@ const Agents = ({ children }) => {
     id: 0,
     name: "Select State",
   });
-  const [selectedCity, setSelectedCity] = useState({ id: 0, name: "-----" });
+  const [selectedCity, setSelectedCity] = useState({
+    id: 0,
+    name: "Select City",
+  });
   const [selectedPerPage, setSelectedPerPage] = useState(perPage[0]);
+  const [isFetching, setIsFetching] = useState(false);
 
   const handleChangePage = (e) => {
     if (e === "0" || e === "") return;
@@ -70,47 +56,66 @@ const Agents = ({ children }) => {
   const handlePrevPage = () => {
     if (refreshData.prevPage === null) return;
     refreshData.page = refreshData.prevPage;
+    setIsFetching(true);
     getRealtorsData();
   };
 
   const handleNextPage = () => {
     if (refreshData.nextPage === null) return;
     refreshData.page = refreshData.nextPage;
+    setIsFetching(true);
     getRealtorsData();
   };
 
-  const handleSorting = (table) => {
-    if (sort === table || sort === "") {
-      setIsDesc(!isDesc);
-    } else {
-      setIsDesc(false);
+  const handleSearch = (e) => {
+    let val = e.target.value;
+    if (e.which === 13) {
+      e.preventDefault();
+      if (val === "") return;
+      setIsFetching(true);
+      refreshData.page = 1;
+      setSearchVal(val);
+      getRealtorsData();
     }
+  };
 
-    setSort(table);
+  const handleSearchChange = (e) => {
+    let val = e.target.value;
+    setSearchVal(val);
+    setSelectedCity({ id: 0, name: "Select City" });
+    setSelectedState({ id: 0, name: "Select State" });
+  };
+
+  const handleStateChange = (d) => {
+    setSearchVal("");
+    setSelectedState(d);
+    setSelectedCity({ id: 0, name: "Select City" });
+  };
+
+  const handleCityChange = (d) => {
+    setSearchVal("");
+    setSelectedCity(d);
   };
 
   useEffect(() => {
-    getRealtorsData();
-  }, [isDesc, sort]);
-
-  useEffect(() => {
+    setIsFetching(true);
     getStatesData();
+    getRealtorsData();
   }, []);
 
   useEffect(() => {
     refreshData.page = 1;
-    setSelectedCity({ id: 0, name: "Select City" });
-    getCitiesData();
-  }, [selectedState]);
+    //setSelectedCity({ id: 0, name: "Select City" });
+    if (selectedState.id !== 0) {
+      setIsFetching(true);
+      getCitiesData();
+      getRealtorsData();
+    }
+  }, [selectedState, selectedCity]);
 
   useEffect(() => {
-    refreshData.page = 1;
-    getRealtorsData();
-  }, [selectedCity]);
-
-  useEffect(() => {
-    console.log(selectedPerPage);
     refreshData.perPage = selectedPerPage.value;
+    setIsFetching(true);
     getRealtorsData();
   }, [selectedPerPage]);
 
@@ -119,13 +124,13 @@ const Agents = ({ children }) => {
       token,
       refreshData.page,
       refreshData.perPage,
-      sort,
-      Number(isDesc),
       selectedCity.id === 0 ? "" : selectedCity.name,
-      selectedState.id === 0 ? "" : selectedState.name
+      selectedState.id === 0 ? "" : selectedState.name,
+      searchVal
     )
       .then((res) => {
         //console.log(res);
+        setIsFetching(false);
         setAgentList(res.data.realtors);
         setRefreshData({
           ...refreshData,
@@ -143,16 +148,13 @@ const Agents = ({ children }) => {
 
   function getStatesData() {
     getStates().then((res) => {
-      //console.log(res.data.states);
       setStates(res.data.states);
     });
   }
 
   function getCitiesData() {
     getCities(selectedState.id).then((res) => {
-      //console.log(res.data.cities);
       setCities(res.data.cities);
-      //getRealtorsData();
     });
   }
 
@@ -205,6 +207,10 @@ const Agents = ({ children }) => {
     }
   }
 
+  if (!user && !token) {
+    return <Navigate to="/login" />;
+  }
+
   return (
     <div className="">
       <div className="sm:flex sm:items-center">
@@ -223,6 +229,7 @@ const Agents = ({ children }) => {
           </button>
         </div>
       </div>
+
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -231,10 +238,14 @@ const Agents = ({ children }) => {
                 Search
               </label>
               <div className="relative mr-5">
-                <div className="flex absolute inset-y-0 left-0 items-center pl-3 pointer-events-none">
-                  <MagnifyingGlassIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+                <div className="flex absolute inset-y-0 left-0 items-center pl-3">
+                  <MagnifyingGlassIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 cursor-pointer" />
                 </div>
+
                 <input
+                  value={searchVal}
+                  onKeyPress={(e) => handleSearch(e)}
+                  onChange={(e) => handleSearchChange(e)}
                   type="text"
                   id="table-search"
                   className="block p-2 pl-10 w-80 text-sm text-gray-900 bg-white-500 rounded-lg border border-gray-300 focus:ring-indigo-800 focus:border-indigo-800 dark:focus:ring-indigo-800 dark:focus:border-indigo-800"
@@ -243,9 +254,14 @@ const Agents = ({ children }) => {
               </div>
 
               <div className="fixed top-0 mr-5 relative text-left w-60 items-center">
-                <Listbox value={selectedState} onChange={setSelectedState}>
+                <Listbox value={selectedState} onChange={handleStateChange}>
                   <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                    <span className="block truncate">{selectedState.name}</span>
+                    <span className="block truncate">
+                      {selectedState.name}{" "}
+                      {selectedState.id !== 0
+                        ? " - " + selectedState.longName
+                        : null}
+                    </span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                       <ChevronUpDownIcon
                         className="h-5 w-5 text-gray-400"
@@ -260,7 +276,7 @@ const Agents = ({ children }) => {
                     leaveTo="opacity-0"
                   >
                     <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      {states.map((state, index) => (
+                      {states.map((s, index) => (
                         <Listbox.Option
                           key={index}
                           className={({ active }) =>
@@ -270,7 +286,7 @@ const Agents = ({ children }) => {
                                 : "text-gray-900"
                             }`
                           }
-                          value={state}
+                          value={s}
                         >
                           {({ selected }) => (
                             <>
@@ -279,7 +295,7 @@ const Agents = ({ children }) => {
                                   selected ? "font-medium" : "font-normal"
                                 }`}
                               >
-                                {state.name}
+                                {s.name} - {s.longName}
                               </span>
                               {selected ? (
                                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
@@ -299,7 +315,7 @@ const Agents = ({ children }) => {
               </div>
 
               <div className="mr-5 relative text-left w-60 items-center">
-                <Listbox value={selectedCity} onChange={setSelectedCity}>
+                <Listbox value={selectedCity} onChange={handleCityChange}>
                   <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
                     <span className="block truncate">{selectedCity.name}</span>
                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
@@ -413,256 +429,267 @@ const Agents = ({ children }) => {
               </div>
             </div>
 
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-              <table
-                id="myTable"
-                className="min-w-full divide-y divide-gray-300"
-              >
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        First Name
-                        <button onClick={() => sortTable(0)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        Last Name
-                        <button onClick={() => sortTable(1)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        Office Name
-                        <button onClick={() => sortTable(2)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        City
-                        <button onClick={() => sortTable(3)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        State
-                        <button onClick={() => sortTable(4)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        Office Phone
-                        <button onClick={() => sortTable(5)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
+            {isFetching ? (
+              <div className="flex justify-center p-40">
+                <Spinner size={16} />
+              </div>
+            ) : (
+              <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                <table
+                  id="myTable"
+                  className="min-w-full divide-y divide-gray-300"
+                >
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          First Name
+                          <button onClick={() => sortTable(0)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          Last Name
+                          <button onClick={() => sortTable(1)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          Office Name
+                          <button onClick={() => sortTable(2)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          City
+                          <button onClick={() => sortTable(3)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          State
+                          <button onClick={() => sortTable(4)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          Office Phone
+                          <button onClick={() => sortTable(5)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
 
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        Cell Phone
-                        <button onClick={() => sortTable(6)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          Cell Phone
+                          <button onClick={() => sortTable(6)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
 
-                    <th
-                      scope="col"
-                      className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                    >
-                      <div className="flex items-center">
-                        Email
-                        <button onClick={() => sortTable(7)}>
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="ml-1 w-3 h-3"
-                            aria-hidden="true"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                          </svg>
-                        </button>
-                      </div>
-                    </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                      >
+                        <div className="flex items-center">
+                          Email
+                          <button onClick={() => sortTable(7)}>
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="ml-1 w-3 h-3"
+                              aria-hidden="true"
+                              fill="currentColor"
+                              viewBox="0 0 320 512"
+                            >
+                              <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </th>
 
-                    <th
-                      scope="col"
-                      className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                    >
-                      <span className="sr-only">Edit</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 bg-white">
-                  {agentList.map((agent) => (
-                    <tr key={agent._id}>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.firstName}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.lastName}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.officeName}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.officeCity}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.officeState}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.officePhone}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.cellPhone}
-                      </td>
-                      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        {agent.email}
-                      </td>
-                      <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                        <a
-                          href={`/agents/${agent._id}`}
-                          className="text-indigo-600 hover:text-indigo-900"
-                        >
-                          View
-                        </a>
-                      </td>
+                      <th
+                        scope="col"
+                        className="relative py-3.5 pl-3 pr-4 sm:pr-6"
+                      ></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {agentList.map((agent) => (
+                      <tr key={agent._id}>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {agent.firstName}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {agent.lastName}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {agent.officeName}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {agent.officeCity}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {agent.officeState}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {agent.officePhone}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          {agent.cellPhone}
+                        </td>
+                        <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <a
+                            className="hover:underline underline-offset-1 hover:text-blue-500"
+                            href={`mailto: ${agent.email}`}
+                          >
+                            {agent.email}
+                          </a>
+                        </td>
+                        <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                          <a
+                            href={`/agents/${agent._id}`}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            View
+                          </a>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
 
-        <nav
-          className="flex items-center justify-between py-2"
-          aria-label="Pagination"
-        >
-          <div className="hidden sm:block">
-            <p className="text-sm text-gray-700">
-              Page <span className="font-medium">{refreshData.page}</span> of{" "}
-              <span className="font-medium">{refreshData.pages}</span>
-              <span className="text-sm ml-2 mr-4">
-                Go to page{" "}
-                <input
-                  style={{ width: "60px" }}
-                  onChange={(e) => handleChangePage(e.target.value)}
-                  type="number"
-                  min="1"
-                  className="border text-left p-1 rounded-md outline-none focus:border-sky-300"
-                />{" "}
-              </span>
-              Total results:{" "}
-              <span className="font-medium">{refreshData.total}</span>
-            </p>
-          </div>
-          <div className="flex flex-1 justify-between sm:justify-end">
-            <button
-              onClick={handlePrevPage}
-              className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Previous
-            </button>
-            <button
-              onClick={handleNextPage}
-              className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Next
-            </button>
-          </div>
-        </nav>
+        {isFetching ? null : (
+          <nav
+            className="flex items-center justify-between py-2"
+            aria-label="Pagination"
+          >
+            <div className="hidden sm:block">
+              <p className="text-sm text-gray-700">
+                Page <span className="font-medium">{refreshData.page}</span> of{" "}
+                <span className="font-medium">{refreshData.pages}</span>
+                <span className="text-sm ml-2 mr-4">
+                  Go to page{" "}
+                  <input
+                    style={{ width: "60px" }}
+                    onChange={(e) => handleChangePage(e.target.value)}
+                    type="number"
+                    min="1"
+                    className="border text-left p-1 rounded-md outline-none focus:border-sky-300"
+                  />{" "}
+                </span>
+                Total results:{" "}
+                <span className="font-medium">{refreshData.total}</span>
+              </p>
+            </div>
+            <div className="flex flex-1 justify-between sm:justify-end">
+              <button
+                onClick={handlePrevPage}
+                className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Previous
+              </button>
+              <button
+                onClick={handleNextPage}
+                className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              >
+                Next
+              </button>
+            </div>
+          </nav>
+        )}
       </div>
     </div>
   );

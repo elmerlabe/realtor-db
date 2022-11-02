@@ -4,20 +4,18 @@ export const instance = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
 });
 
-export const getRealtors = (token, page, per_page, sort, isDesc, city, state) =>
+export const getRealtors = (token, page, per_page, city, state, search) =>
   instance.post(
     "/getRealtors?page=" +
       page +
       "&per_page=" +
       per_page +
-      "&sort=" +
-      sort +
-      "&isDesc=" +
-      isDesc +
       "&city=" +
       city +
       "&state=" +
-      state,
+      state +
+      "&search=" +
+      search,
     { token }
   );
 

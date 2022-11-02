@@ -1,17 +1,21 @@
 import { TrashIcon } from "@heroicons/react/24/outline";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
   addNewAgent,
   getAgentFromId,
+  getStates,
   removeAgent,
   updateAgentInfo,
 } from "../api";
+import { AuthContext } from "../context";
 
 const NewRecord = () => {
   const token = localStorage.getItem("token");
+  const { user } = useContext(AuthContext);
   const { agentId } = useParams();
+  const [states, setStates] = useState([]);
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -31,6 +35,11 @@ const NewRecord = () => {
   });
 
   useEffect(() => {
+    getStates().then((res) => {
+      console.log(res);
+      setStates(res.data.states);
+    });
+
     if (agentId) {
       getAgentFromId(agentId, token).then((res) => {
         const d = res.data.data[0];
@@ -57,8 +66,6 @@ const NewRecord = () => {
 
   const handleSubmitForm = (e) => {
     e.preventDefault();
-    console.log(formData);
-
     if (agentId) {
       updateAgentInfo(token, agentId, formData).then((res) => {
         console.log(res);
@@ -94,6 +101,10 @@ const NewRecord = () => {
       }
     });
   };
+
+  if (!user && !token) {
+    return <Navigate to="/login" />;
+  }
 
   return (
     <div>
@@ -292,15 +303,20 @@ const NewRecord = () => {
                 Office State
               </label>
               <div>
-                <input
-                  type="text"
+                <select
                   id="officeState"
                   value={formData.officeState}
                   onChange={(e) =>
                     setFormData({ ...formData, officeState: e.target.value })
                   }
                   className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
+                >
+                  {states.map((s, i) => (
+                    <option key={i} value={s.name}>
+                      {s.longName}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 
