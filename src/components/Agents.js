@@ -36,15 +36,9 @@ const Agents = ({ children }) => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
-  const [selectedState, setSelectedState] = useState({
-    id: 0,
-    name: "Select State",
-  });
-  const [selectedCity, setSelectedCity] = useState({
-    id: 0,
-    name: "Select City",
-  });
-  const [selectedPerPage, setSelectedPerPage] = useState(perPage[0]);
+  const [selectedState, setSelectedState] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedPerPage, setSelectedPerPage] = useState(perPage[0].value);
   const [isFetching, setIsFetching] = useState(false);
 
   const handleChangePage = (e) => {
@@ -82,19 +76,23 @@ const Agents = ({ children }) => {
   const handleSearchChange = (e) => {
     let val = e.target.value;
     setSearchVal(val);
-    setSelectedCity({ id: 0, name: "Select City" });
-    setSelectedState({ id: 0, name: "Select State" });
+    setSelectedCity("");
+    setSelectedState("");
   };
 
   const handleStateChange = (d) => {
     setSearchVal("");
-    setSelectedState(d);
-    setSelectedCity({ id: 0, name: "Select City" });
+    setSelectedCity("");
+    setSelectedState(d.target.value);
   };
 
   const handleCityChange = (d) => {
     setSearchVal("");
-    setSelectedCity(d);
+    setSelectedCity(d.target.value);
+  };
+
+  const handleSelectPerPage = (d) => {
+    setSelectedPerPage(d.target.value);
   };
 
   useEffect(() => {
@@ -105,16 +103,15 @@ const Agents = ({ children }) => {
 
   useEffect(() => {
     refreshData.page = 1;
-    //setSelectedCity({ id: 0, name: "Select City" });
-    if (selectedState.id !== 0) {
+    if (selectedState !== "") {
       setIsFetching(true);
-      getCitiesData();
       getRealtorsData();
+      getCitiesData();
     }
   }, [selectedState, selectedCity]);
 
   useEffect(() => {
-    refreshData.perPage = selectedPerPage.value;
+    refreshData.perPage = selectedPerPage;
     setIsFetching(true);
     getRealtorsData();
   }, [selectedPerPage]);
@@ -124,8 +121,8 @@ const Agents = ({ children }) => {
       token,
       refreshData.page,
       refreshData.perPage,
-      selectedCity.id === 0 ? "" : selectedCity.name,
-      selectedState.id === 0 ? "" : selectedState.name,
+      selectedCity,
+      selectedState,
       searchVal
     )
       .then((res) => {
@@ -153,7 +150,7 @@ const Agents = ({ children }) => {
   }
 
   function getCitiesData() {
-    getCities(selectedState.id).then((res) => {
+    getCities(selectedState).then((res) => {
       setCities(res.data.cities);
     });
   }
@@ -248,129 +245,60 @@ const Agents = ({ children }) => {
                   onChange={(e) => handleSearchChange(e)}
                   type="text"
                   id="table-search"
-                  className="block p-2 pl-10 w-80 text-sm text-gray-900 bg-white-500 rounded-lg border border-gray-300 focus:ring-indigo-800 focus:border-indigo-800 dark:focus:ring-indigo-800 dark:focus:border-indigo-800"
+                  className="block p-2 pl-10 w-80 text-sm text-gray-900 bg-white-500 rounded-lg border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-800"
                   placeholder="Search for agent information"
                 />
               </div>
 
-              <div className="fixed top-0 mr-5 relative text-left w-60 items-center">
-                <Listbox value={selectedState} onChange={handleStateChange}>
-                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                    <span className="block truncate">
-                      {selectedState.name}{" "}
-                      {selectedState.id !== 0
-                        ? " - " + selectedState.longName
-                        : null}
-                    </span>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                      <ChevronUpDownIcon
-                        className="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  </Listbox.Button>
-                  <Transition
-                    as={Fragment}
-                    leave="transition ease-in duration-100"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                  >
-                    <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      {states.map((s, index) => (
-                        <Listbox.Option
-                          key={index}
-                          className={({ active }) =>
-                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                              active
-                                ? "bg-amber-100 text-amber-900"
-                                : "text-gray-900"
-                            }`
-                          }
-                          value={s}
-                        >
-                          {({ selected }) => (
-                            <>
-                              <span
-                                className={`block truncate ${
-                                  selected ? "font-medium" : "font-normal"
-                                }`}
-                              >
-                                {s.name} - {s.longName}
-                              </span>
-                              {selected ? (
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
-                                  <CheckIcon
-                                    className="h-5 w-5"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </Transition>
-                </Listbox>
+              <div className="mr-5 relative text-left w-60 items-center">
+                <select
+                  onChange={handleStateChange}
+                  className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
+                >
+                  <option className="font-semibold" value="">
+                    Select State
+                  </option>
+                  {states.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name} - {c.longName}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mr-5 relative text-left w-60 items-center">
-                <Listbox value={selectedCity} onChange={handleCityChange}>
-                  <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                    <span className="block truncate">{selectedCity.name}</span>
-                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                      <ChevronUpDownIcon
-                        className="h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </span>
-                  </Listbox.Button>
-                  <Transition
-                    as={Fragment}
-                    leave="transition ease-in duration-100"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                  >
-                    <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                      {cities.map((city, index) => (
-                        <Listbox.Option
-                          key={index}
-                          className={({ active }) =>
-                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                              active
-                                ? "bg-amber-100 text-amber-900"
-                                : "text-gray-900"
-                            }`
-                          }
-                          value={city}
-                        >
-                          {({ selected }) => (
-                            <>
-                              <span
-                                className={`block truncate ${
-                                  selected ? "font-medium" : "font-normal"
-                                }`}
-                              >
-                                {city.name}
-                              </span>
-                              {selected ? (
-                                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
-                                  <CheckIcon
-                                    className="h-5 w-5"
-                                    aria-hidden="true"
-                                  />
-                                </span>
-                              ) : null}
-                            </>
-                          )}
-                        </Listbox.Option>
-                      ))}
-                    </Listbox.Options>
-                  </Transition>
-                </Listbox>
+                <select
+                  onChange={handleCityChange}
+                  className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
+                >
+                  <option className="font-semibold" value="">
+                    Select City
+                  </option>
+                  {cities.map((c) => (
+                    <option key={c.id} value={c.name}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="mr-5 relative text-left w-30 items-center">
+                <select
+                  onChange={handleSelectPerPage}
+                  className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
+                >
+                  {perPage.map((c, i) => (
+                    <option key={i} value={c.value}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div
+                className="mr-5 relative text-left w-30 items-center"
+                style={{ display: "none" }}
+              >
                 <Listbox value={selectedPerPage} onChange={setSelectedPerPage}>
                   <Listbox.Button className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
                     <span className="block truncate">
