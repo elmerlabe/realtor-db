@@ -36,7 +36,6 @@ const NewRecord = () => {
 
   useEffect(() => {
     getStates().then((res) => {
-      console.log(res);
       setStates(res.data.states);
     });
 
@@ -68,12 +67,10 @@ const NewRecord = () => {
     e.preventDefault();
     if (agentId) {
       updateAgentInfo(token, agentId, formData).then((res) => {
-        console.log(res);
         Swal.fire("Success", res.data.message, "success");
       });
     } else {
       addNewAgent(token, formData).then((res) => {
-        console.log(res);
         Swal.fire("Success", res.data.message, "success");
       });
     }

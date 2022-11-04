@@ -40,3 +40,6 @@ export const addNewAgent = (token, data) =>
 export const getStates = () => instance.get("/getStates");
 
 export const getCities = (state) => instance.get("/getCities?state=" + state);
+
+export const updateUser = (token, data) =>
+  instance.post("/updateUser", { token, data });
