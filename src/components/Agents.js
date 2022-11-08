@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect, Fragment } from "react";
 import { AuthContext } from "../context";
-import { getCities, getRealtors, getStates } from "../api";
+import { exportCSV, getCities, getRealtors, getStates } from "../api";
 import Swal from "sweetalert2";
 import {
   CheckIcon,
@@ -93,6 +93,19 @@ const Agents = ({ children }) => {
 
   const handleSelectPerPage = (d) => {
     setSelectedPerPage(d.target.value);
+  };
+
+  const handleExportCSV = (e) => {
+    if (selectedState === "") return;
+    e.target.disabled = true;
+    let url =
+      process.env.REACT_APP_API_URL +
+      "/exportCSV?state=" +
+      selectedState +
+      "&city=" +
+      selectedCity;
+    window.open(url, "_blank");
+    e.target.disabled = false;
   };
 
   useEffect(() => {
@@ -293,6 +306,17 @@ const Agents = ({ children }) => {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="mr-5 flex ">
+                <button
+                  onClick={handleExportCSV}
+                  type="button"
+                  className="rounded-md bg-gray-500 border-none shadow-md focus:outline-none sm:text-sm text-center text-gray-200"
+                  style={{ width: "6rem" }}
+                >
+                  Export CSV
+                </button>
               </div>
 
               <div
