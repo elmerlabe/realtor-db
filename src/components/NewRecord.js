@@ -1,9 +1,10 @@
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
 import { useContext, useEffect, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
   addNewAgent,
+  emailCheck,
   getAgentFromId,
   getStates,
   removeAgent,
@@ -15,7 +16,22 @@ const NewRecord = () => {
   const token = localStorage.getItem("token");
   const { user } = useContext(AuthContext);
   const { agentId } = useParams();
+  const [currentEmail, setCurrentEmail] = useState("");
   const [states, setStates] = useState([]);
+  const [emailChck, setEmailChck] = useState({ valid: true, message: "" });
+  const [officePhoneChck, setOfficePhoneChck] = useState({
+    valid: true,
+    message: "",
+  });
+  const [officeFaxChck, setOfficeFaxChck] = useState({
+    valid: true,
+    message: "",
+  });
+  const [cellPhoneChck, setCellPhoneChck] = useState({
+    valid: true,
+    message: "",
+  });
+
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -42,6 +58,7 @@ const NewRecord = () => {
     if (agentId) {
       getAgentFromId(agentId, token).then((res) => {
         const d = res.data.data[0];
+        setCurrentEmail(d["email"]);
         setFormData({
           email: d["email"],
           firstName: d["firstName"],
@@ -65,13 +82,26 @@ const NewRecord = () => {
 
   const handleSubmitForm = (e) => {
     e.preventDefault();
+    if (
+      !emailChck.valid ||
+      !officePhoneChck.valid ||
+      !officeFaxChck.valid ||
+      !cellPhoneChck.valid
+    )
+      return false;
+
     if (agentId) {
       updateAgentInfo(token, agentId, formData).then((res) => {
         Swal.fire("Success", res.data.message, "success");
+        setCurrentEmail(formData.email);
       });
     } else {
       addNewAgent(token, formData).then((res) => {
-        Swal.fire("Success", res.data.message, "success");
+        if (res.data.result) {
+          Swal.fire("Success", res.data.message, "success");
+        } else {
+          Swal.fire("Error", res.data.message, "error");
+        }
       });
     }
   };
@@ -99,6 +129,82 @@ const NewRecord = () => {
     });
   };
 
+  function checkPhoneNumber(number) {
+    //var reg = /^\(?(\d{3})\)?[- ]?(\d{3})[- ]?(\d{4})$/; // 111-111-1111, 1111111111, (111) 111-1111
+    var reg = /^(\()?\d{3}(\))?(-|\s)?\d{3}(-|\s)\d{4}$/; // 111-111-1111, (111) 111-1111
+    if (number.match(reg)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function validateOfficePhone(number) {
+    if (number !== "") {
+      if (checkPhoneNumber(number)) {
+        setOfficePhoneChck({ ...officePhoneChck, valid: true, message: "" });
+      } else {
+        setOfficePhoneChck({
+          ...officePhoneChck,
+          valid: false,
+          message: "* Number format must be xxx-xxx-xxxx",
+        });
+      }
+    } else {
+      setOfficePhoneChck({ ...officePhoneChck, valid: true, message: "" });
+    }
+  }
+
+  function validateOfficeFax(number) {
+    if (number !== "") {
+      if (checkPhoneNumber(number)) {
+        setOfficeFaxChck({ ...officeFaxChck, valid: true, message: "" });
+      } else {
+        setOfficeFaxChck({
+          ...officeFaxChck,
+          valid: false,
+          message: "* Number format must be xxx-xxx-xxxx",
+        });
+      }
+    } else {
+      setOfficeFaxChck({ ...officePhoneChck, valid: true, message: "" });
+    }
+  }
+
+  function validateCellPhone(number) {
+    if (number !== "") {
+      if (checkPhoneNumber(number)) {
+        setCellPhoneChck({ ...cellPhoneChck, valid: true, message: "" });
+      } else {
+        setCellPhoneChck({
+          ...cellPhoneChck,
+          valid: false,
+          message: "* Number format must be xxx-xxx-xxxx",
+        });
+      }
+    } else {
+      setCellPhoneChck({ ...cellPhoneChck, valid: true, message: "" });
+    }
+  }
+
+  function validateEmail(email) {
+    if (email !== "" && currentEmail !== email) {
+      emailCheck(email).then((res) => {
+        if (res.data.result) {
+          setEmailChck({ ...emailChck, valid: true, message: "" });
+        } else {
+          setEmailChck({
+            ...emailChck,
+            valid: false,
+            message: "* " + res.data.message,
+          });
+        }
+      });
+    } else {
+      setEmailChck({ ...emailChck, valid: true, message: "" });
+    }
+  }
+
   if (!user && !token) {
     return <Navigate to="/login" />;
   }
@@ -124,11 +230,22 @@ const NewRecord = () => {
                   id="email"
                   required
                   value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    validateEmail(e.target.value);
+                  }}
+                  className={
+                    (emailChck.message === ""
+                      ? "border-gray-300"
+                      : "border-red-300") +
+                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                   }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                 />
+                {emailChck.valid ? null : (
+                  <small className="text-sm text-red-500">
+                    {emailChck.message}
+                  </small>
+                )}
               </div>
             </div>
 
@@ -369,11 +486,22 @@ const NewRecord = () => {
                   type="text"
                   id="officePhone"
                   value={formData.officePhone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officePhone: e.target.value })
+                  onChange={(e) => {
+                    setFormData({ ...formData, officePhone: e.target.value });
+                    validateOfficePhone(e.target.value);
+                  }}
+                  className={
+                    (officePhoneChck.message === ""
+                      ? "border-gray-300"
+                      : "border-red-300") +
+                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                   }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                 />
+                {officePhoneChck.valid ? null : (
+                  <small className="text-sm text-red-500">
+                    {officePhoneChck.message}
+                  </small>
+                )}
               </div>
             </div>
 
@@ -389,11 +517,22 @@ const NewRecord = () => {
                   type="text"
                   id="officeFax"
                   value={formData.officeFax}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeFax: e.target.value })
+                  onChange={(e) => {
+                    setFormData({ ...formData, officeFax: e.target.value });
+                    validateOfficeFax(e.target.value);
+                  }}
+                  className={
+                    (officeFaxChck.message === ""
+                      ? "border-gray-300"
+                      : "border-red-300") +
+                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                   }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                 />
+                {officeFaxChck.valid ? null : (
+                  <small className="text-sm text-red-500">
+                    {officeFaxChck.message}
+                  </small>
+                )}
               </div>
             </div>
 
@@ -409,16 +548,28 @@ const NewRecord = () => {
                   type="text"
                   id="cellPhone"
                   value={formData.cellPhone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, cellPhone: e.target.value })
+                  onChange={(e) => {
+                    setFormData({ ...formData, cellPhone: e.target.value });
+                    validateCellPhone(e.target.value);
+                  }}
+                  className={
+                    (cellPhoneChck.message === ""
+                      ? "border-gray-300"
+                      : "border-red-300") +
+                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                   }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
                 />
+                {cellPhoneChck.valid ? null : (
+                  <small className="text-sm text-red-500">
+                    {cellPhoneChck.message}
+                  </small>
+                )}
               </div>
             </div>
             <div></div>
             <div className="md:mt-4">
               <button
+                id="submitbtn"
                 type="submit"
                 className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
               >

@@ -43,3 +43,5 @@ export const getCities = (state) => instance.get("/getCities?state=" + state);
 
 export const updateUser = (token, data) =>
   instance.post("/updateUser", { token, data });
+
+export const emailCheck = (email) => instance.get("/emailCheck?email=" + email);
