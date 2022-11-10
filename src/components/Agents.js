@@ -27,7 +27,7 @@ const Agents = ({ children }) => {
   const [refreshData, setRefreshData] = useState({
     page: 1,
     pages: 0,
-    perPage: 10,
+    perPage: 50,
     nextPage: 0,
     prevPage: 0,
     total: 0,
@@ -38,7 +38,7 @@ const Agents = ({ children }) => {
 
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
-  const [selectedPerPage, setSelectedPerPage] = useState(perPage[0].value);
+  const [selectedPerPage, setSelectedPerPage] = useState(perPage[4].value);
   const [isFetching, setIsFetching] = useState(false);
 
   const handleChangePage = (e) => {
@@ -297,6 +297,7 @@ const Agents = ({ children }) => {
 
               <div className="mr-5 relative text-left w-30 items-center">
                 <select
+                  value={selectedPerPage}
                   onChange={handleSelectPerPage}
                   className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
                 >
@@ -556,7 +557,7 @@ const Agents = ({ children }) => {
                   </thead>
                   <tbody className="divide-y divide-gray-200 bg-white">
                     {agentList.map((agent) => (
-                      <tr key={agent._id}>
+                      <tr key={agent._id} className="hover:bg-gray-100">
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           {agent.firstName}
                         </td>
