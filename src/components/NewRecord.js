@@ -19,7 +19,7 @@ const NewRecord = () => {
   const [currentEmail, setCurrentEmail] = useState("");
   const [states, setStates] = useState([]);
 
-  const errorMsg = "* Please input a 10 digit number";
+  const errorMsg = "* Please enter a valid phone number";
   const [emailChck, setEmailChck] = useState({ valid: true, message: "" });
   const [officePhoneChck, setOfficePhoneChck] = useState({
     valid: true,
@@ -142,7 +142,28 @@ const NewRecord = () => {
     }
   }
 
+  function addHypen(e) {
+    const id = e.target.id;
+    const key = Number(e.key);
+    const input = document.getElementById(id);
+
+    if (isNaN(key)) return;
+
+    if (
+      key !== "Backspace" &&
+      (input.value.length === 3 || input.value.length === 7)
+    ) {
+      input.value += "-";
+    }
+  }
+
   function displayError() {
+    if (!emailChck.valid)
+      setEmailChck({
+        ...emailChck,
+        valid: false,
+      });
+
     if (!officePhoneChck.valid)
       setOfficePhoneChck({
         ...officePhoneChck,
@@ -165,89 +186,56 @@ const NewRecord = () => {
       });
   }
 
-  function formatToPhoneNumber(number) {
-    let formatedNum =
-      number.substring(0, 3) +
-      "-" +
-      number.substring(3, 6) +
-      "-" +
-      number.substring(6, 10);
-    return formatedNum;
-  }
+  function validateNumber(e) {
+    const id = e.target.id;
+    const val = e.target.value;
 
-  function validateOfficePhone(e) {
-    let number = e.target.value;
-    if (isNaN(number) && e.keyCode !== 8) {
-      return;
-    } else if (isNaN(number) && e.keyCode === 8) {
-      setFormData({ ...formData, officePhone: "" });
-      return;
+    if (id === "cellPhone") {
+      if (checkPhoneNumber(val)) {
+        setCellPhoneChck({
+          ...formData,
+          valid: true,
+          message: "",
+        });
+        setFormData({ ...formData, cellPhone: val });
+      } else {
+        setCellPhoneChck({
+          ...formData,
+          valid: false,
+          message: errorMsg,
+        });
+      }
+    } else if (id === "officeFax") {
+      if (checkPhoneNumber(val)) {
+        setOfficeFaxChck({
+          ...formData,
+          valid: true,
+          message: "",
+        });
+        setFormData({ ...formData, officeFax: val });
+      } else {
+        setOfficeFaxChck({
+          ...formData,
+          valid: false,
+          message: errorMsg,
+        });
+      }
+    } else if (id === "officePhone") {
+      if (checkPhoneNumber(val)) {
+        setOfficePhoneChck({
+          ...formData,
+          valid: true,
+          message: "",
+        });
+        setFormData({ ...formData, officePhone: val });
+      } else {
+        setOfficePhoneChck({
+          ...formData,
+          valid: false,
+          message: errorMsg,
+        });
+      }
     }
-
-    if (number.length === 10) {
-      setOfficePhoneChck({ ...officePhoneChck, valid: true, message: "" });
-      setFormData({ ...formData, officePhone: formatToPhoneNumber(number) });
-      return;
-    } else {
-      setOfficePhoneChck({
-        ...officePhoneChck,
-        valid: false,
-        //message: errorMsg,
-      });
-    }
-    if (number === "")
-      setOfficePhoneChck({ ...officePhoneChck, valid: true, message: "" });
-    setFormData({ ...formData, officePhone: number });
-  }
-
-  function validateOfficeFax(e) {
-    let number = e.target.value;
-    if (isNaN(number) && e.keyCode !== 8) {
-      return;
-    } else if (isNaN(number) && e.keyCode === 8) {
-      setFormData({ ...formData, officeFax: "" });
-      return;
-    }
-
-    if (number.length === 10) {
-      setOfficeFaxChck({ ...officeFaxChck, valid: true, message: "" });
-      setFormData({ ...formData, officeFax: formatToPhoneNumber(number) });
-      return;
-    } else {
-      setOfficeFaxChck({
-        ...officeFaxChck,
-        valid: false,
-        //message: errorMsg,
-      });
-    }
-    if (number === "")
-      setOfficeFaxChck({ ...officeFaxChck, valid: true, message: "" });
-    setFormData({ ...formData, officeFax: number });
-  }
-
-  function validateCellPhone(e) {
-    let number = e.target.value;
-    if (isNaN(number) && e.keyCode !== 8) {
-      return;
-    } else if (isNaN(number) && e.keyCode === 8) {
-      setFormData({ ...formData, cellPhone: "" });
-      return;
-    }
-
-    if (number.length === 10) {
-      setCellPhoneChck({ ...cellPhoneChck, valid: true, message: "" });
-      setFormData({ ...formData, cellPhone: formatToPhoneNumber(number) });
-      return;
-    } else {
-      setCellPhoneChck({
-        ...cellPhoneChck,
-        valid: false,
-        //message: errorMsg,
-      });
-    }
-    if (number === "")
-      setCellPhoneChck({ ...cellPhoneChck, valid: true, message: "" });
-    setFormData({ ...formData, cellPhone: number });
   }
 
   function validateEmail(email) {
@@ -293,10 +281,10 @@ const NewRecord = () => {
                   id="email"
                   required
                   value={formData.email}
-                  onChange={(e) => {
-                    setFormData({ ...formData, email: e.target.value });
-                    validateEmail(e.target.value);
-                  }}
+                  onBlur={(e) => validateEmail(e.target.value)}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                   className={
                     (emailChck.message === ""
                       ? "border-gray-300"
@@ -324,6 +312,7 @@ const NewRecord = () => {
                   type="text"
                   id="firstName"
                   value={formData.firstName}
+                  onFocus={displayError}
                   onChange={(e) =>
                     setFormData({ ...formData, firstName: e.target.value })
                   }
@@ -548,9 +537,9 @@ const NewRecord = () => {
                 <input
                   type="text"
                   id="officePhone"
-                  value={formData.officePhone}
-                  onKeyUp={(e) => validateOfficePhone(e)}
-                  onChange={(e) => validateOfficePhone(e)}
+                  maxLength={12}
+                  onBlur={(e) => validateNumber(e)}
+                  onKeyUp={(e) => addHypen(e)}
                   className={
                     (officePhoneChck.message === ""
                       ? "border-gray-300"
@@ -577,9 +566,9 @@ const NewRecord = () => {
                 <input
                   type="text"
                   id="officeFax"
-                  value={formData.officeFax}
-                  onKeyUp={(e) => validateOfficeFax(e)}
-                  onChange={(e) => validateOfficeFax(e)}
+                  maxLength={12}
+                  onBlur={(e) => validateNumber(e)}
+                  onKeyUp={(e) => addHypen(e)}
                   className={
                     (officeFaxChck.message === ""
                       ? "border-gray-300"
@@ -606,9 +595,9 @@ const NewRecord = () => {
                 <input
                   type="text"
                   id="cellPhone"
-                  value={formData.cellPhone}
-                  onKeyUp={(e) => validateCellPhone(e)}
-                  onChange={(e) => validateCellPhone(e)}
+                  maxLength={12}
+                  onBlur={(e) => validateNumber(e)}
+                  onKeyUp={(e) => addHypen(e)}
                   className={
                     (cellPhoneChck.message === ""
                       ? "border-gray-300"
