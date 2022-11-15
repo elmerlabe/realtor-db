@@ -20,6 +20,17 @@ const perPage = [
   { value: "100", name: "Show 100" },
 ];
 
+const searchList = [
+  { value: "name", name: "Name" },
+  { value: "email", name: "Email" },
+  { value: "officeName", name: "Company" },
+  { value: "officeAddress", name: "Address" },
+  { value: "phoneNumber", name: "Phone Number" },
+  { value: "officeZip", name: "Zip Code" },
+  { value: "officeCity", name: "City" },
+  { value: "officeCountry", name: "Country" },
+];
+
 const Agents = ({ children }) => {
   const { user } = useContext(AuthContext);
   const token = localStorage.getItem("token");
@@ -36,6 +47,7 @@ const Agents = ({ children }) => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
 
+  const [selectedColumn, setSelectedColumn] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedPerPage, setSelectedPerPage] = useState(perPage[4].value);
@@ -61,9 +73,9 @@ const Agents = ({ children }) => {
     getRealtorsData();
   };
 
-  const handleSearch = (e) => {
-    let val = e.target.value;
-    if (e.which === 13) {
+  const handleSearch = (e, type) => {
+    if (e.which === 13 && type === "") {
+      let val = e.target.value;
       e.preventDefault();
       if (val === "") return;
       setIsFetching(true);
@@ -71,23 +83,29 @@ const Agents = ({ children }) => {
       setSearchVal(val);
       getRealtorsData();
     }
+    if (type === "btnSearch") {
+      if (searchVal === "") return;
+      setIsFetching(true);
+      refreshData.page = 1;
+      getRealtorsData();
+    }
   };
 
   const handleSearchChange = (e) => {
     let val = e.target.value;
     setSearchVal(val);
-    setSelectedCity("");
-    setSelectedState("");
+    //setSelectedCity("");
+    //setSelectedState("");
   };
 
   const handleStateChange = (d) => {
-    setSearchVal("");
+    //setSearchVal("");
     setSelectedCity("");
     setSelectedState(d.target.value);
   };
 
   const handleCityChange = (d) => {
-    setSearchVal("");
+    //setSearchVal("");
     setSelectedCity(d.target.value);
   };
 
@@ -136,7 +154,8 @@ const Agents = ({ children }) => {
       refreshData.perPage,
       selectedCity,
       selectedState,
-      searchVal
+      searchVal,
+      selectedColumn
     )
       .then((res) => {
         //console.log(res);
@@ -247,20 +266,38 @@ const Agents = ({ children }) => {
               <label htmlFor="table-search" className="sr-only">
                 Search
               </label>
-              <div className="relative mr-5">
-                <div className="flex absolute inset-y-0 left-0 items-center pl-3">
-                  <MagnifyingGlassIcon className="w-5 h-5 text-gray-500 dark:text-gray-400 cursor-pointer" />
-                </div>
-
+              <div className="flex mr-5">
+                <select
+                  onChange={(e) => setSelectedColumn(e.target.value)}
+                  style={{ width: "8.5rem" }}
+                  className="text-sm p-2 text-gray-900 bg-white-500 rounded-tl-md rounded-bl-md border border-gray-300 outline-none"
+                >
+                  <option className="font-semibold" value="">
+                    Select search
+                  </option>
+                  {searchList.map((info, i) => (
+                    <option key={i} value={info.value}>
+                      {info.name}
+                    </option>
+                  ))}
+                </select>
                 <input
+                  style={{ width: "16rem", borderLeft: "none" }}
                   value={searchVal}
-                  onKeyPress={(e) => handleSearch(e)}
+                  onKeyPress={(e) => handleSearch(e, "")}
                   onChange={(e) => handleSearchChange(e)}
                   type="text"
                   id="table-search"
-                  className="block p-2 pl-10 w-80 text-sm text-gray-900 bg-white-500 rounded-lg border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-800"
-                  placeholder="Search for agent information"
+                  className="relative p-2 pr-10 left-0 text-sm text-gray-900 bg-white-500 border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-800"
+                  placeholder="Enter Keywords"
                 />
+                <div
+                  onClick={() => handleSearch([], "btnSearch")}
+                  style={{ borderLeft: "none" }}
+                  className="flex px-2 border border-gray-300 inset-y-0  items-center rounded-tr-md rounded-br-md bg-gray-100 cursor-pointer"
+                >
+                  <MagnifyingGlassIcon className="w-5 text-slate-600" />
+                </div>
               </div>
 
               <div className="mr-5 relative text-left w-60 items-center">
@@ -380,6 +417,13 @@ const Agents = ({ children }) => {
                   </Transition>
                 </Listbox>
               </div>
+            </div>
+
+            <div className="mt-5 mb-1">
+              Total results:{" "}
+              <span className="font-medium">
+                {isFetching ? "" : refreshData.total}
+              </span>
             </div>
 
             {isFetching ? (
@@ -623,8 +667,6 @@ const Agents = ({ children }) => {
                     className="border text-left p-1 rounded-md outline-none focus:border-sky-300"
                   />{" "}
                 </span>
-                Total results:{" "}
-                <span className="font-medium">{refreshData.total}</span>
               </p>
             </div>
             <div className="flex flex-1 justify-between sm:justify-end">
