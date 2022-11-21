@@ -150,7 +150,7 @@ const NewRecord = () => {
     if (isNaN(key)) return;
 
     if (
-      key !== "Backspace" &&
+      e.key !== "Backspace" &&
       (input.value.length === 3 || input.value.length === 7)
     ) {
       input.value += "-";
@@ -539,7 +539,7 @@ const NewRecord = () => {
                   id="officePhone"
                   maxLength={12}
                   onBlur={(e) => validateNumber(e)}
-                  onKeyUp={(e) => addHypen(e)}
+                  onKeyDown={(e) => addHypen(e)}
                   className={
                     (officePhoneChck.message === ""
                       ? "border-gray-300"
@@ -568,7 +568,7 @@ const NewRecord = () => {
                   id="officeFax"
                   maxLength={12}
                   onBlur={(e) => validateNumber(e)}
-                  onKeyUp={(e) => addHypen(e)}
+                  onKeyDown={(e) => addHypen(e)}
                   className={
                     (officeFaxChck.message === ""
                       ? "border-gray-300"
@@ -597,7 +597,7 @@ const NewRecord = () => {
                   id="cellPhone"
                   maxLength={12}
                   onBlur={(e) => validateNumber(e)}
-                  onKeyUp={(e) => addHypen(e)}
+                  onKeyDown={(e) => addHypen(e)}
                   className={
                     (cellPhoneChck.message === ""
                       ? "border-gray-300"
