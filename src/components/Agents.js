@@ -187,6 +187,18 @@ const Agents = ({ children }) => {
     });
   }
 
+  function clearFilters() {
+    setSelectedColumn("");
+    setSelectedState("");
+    setSelectedCity("");
+    //setSearchVal("");
+    setSelectedPerPage(50);
+    document.getElementById("searchDropDown").options[0].selected = "selected";
+    document.getElementById("stateDropDown").options[0].selected = "selected";
+    document.getElementById("cityDropDown").options[0].selected = "selected";
+    document.getElementById("perPageDropDown").options[4].selected = "selected";
+  }
+
   function sortTable(n) {
     let table,
       rows,
@@ -268,6 +280,7 @@ const Agents = ({ children }) => {
               </label>
               <div className="flex mr-5">
                 <select
+                  id="searchDropDown"
                   onChange={(e) => setSelectedColumn(e.target.value)}
                   style={{ width: "8.5rem" }}
                   className="text-sm p-2 text-gray-900 bg-white-500 rounded-tl-md rounded-bl-md border border-gray-300 outline-none"
@@ -300,8 +313,12 @@ const Agents = ({ children }) => {
                 </div>
               </div>
 
-              <div className="mr-5 relative text-left w-60 items-center">
+              <div
+                style={{ width: "12rem" }}
+                className="mr-5 relative text-left items-center"
+              >
                 <select
+                  id="stateDropDown"
                   onChange={handleStateChange}
                   className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
                 >
@@ -316,8 +333,12 @@ const Agents = ({ children }) => {
                 </select>
               </div>
 
-              <div className="mr-5 relative text-left w-60 items-center">
+              <div
+                style={{ width: "12rem" }}
+                className="mr-5 relative text-left items-center"
+              >
                 <select
+                  id="cityDropDown"
                   onChange={handleCityChange}
                   className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
                 >
@@ -334,6 +355,7 @@ const Agents = ({ children }) => {
 
               <div className="mr-5 relative text-left w-30 items-center">
                 <select
+                  id="perPageDropDown"
                   value={selectedPerPage}
                   onChange={handleSelectPerPage}
                   className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
@@ -355,6 +377,17 @@ const Agents = ({ children }) => {
                 >
                   Export CSV
                 </button>
+              </div>
+
+              <div className="mr-5 flex">
+                <a
+                  onClick={clearFilters}
+                  type="button"
+                  className="underline cursor-pointer mt-2 hover:text-blue-500"
+                  style={{ width: "6rem" }}
+                >
+                  Clear filters
+                </a>
               </div>
 
               <div
