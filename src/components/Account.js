@@ -43,7 +43,7 @@ const Account = () => {
           Security Settings
         </h1>
         <form onSubmit={handleFormSecurSubmit}>
-          <div className="w-1/3 grid md:grid-cols-1 bg-white p-4 shadow rounded-md">
+          <div className="md:w-1/3 grid md:grid-cols-1 bg-white p-4 shadow rounded-md">
             <div className="mb-4">
               <label
                 htmlFor="username"
