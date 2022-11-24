@@ -78,6 +78,9 @@ const NewRecord = () => {
           officeFax: d["officeFax"],
           cellPhone: d["cellPhone"],
         });
+        document.getElementById("officePhone").value = d["officePhone"];
+        document.getElementById("officeFax").value = d["officeFax"];
+        document.getElementById("cellPhone").value = d["cellPhone"];
       });
     }
   }, []);
