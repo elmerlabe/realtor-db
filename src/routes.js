@@ -6,6 +6,7 @@ import Agents from "./components/Agents";
 import NewAgent from "./components/NewRecord";
 import Account from "./components/Account";
 import NewRecord from "./components/NewRecord";
+import Home from "./components/Home";
 
 const AppRoutes = () => (
   <Routes>
@@ -22,6 +23,7 @@ const AppRoutes = () => (
       element={<Sidebar children={<NewRecord />} />}
     />
     <Route path="/account" element={<Sidebar children={<Account />} />} />
+    <Route path="/home" element={<Sidebar children={<Home />} />} />
   </Routes>
 );
 

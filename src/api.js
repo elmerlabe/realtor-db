@@ -55,3 +55,10 @@ export const updateUser = (token, data) =>
   instance.post("/updateUser", { token, data });
 
 export const emailCheck = (email) => instance.get("/emailCheck?email=" + email);
+
+export const getDatabaseSummary = () => instance.get("/getDatabaseSummary");
+
+export const getAgentsPerState = () => instance.get("/getAgentsPerState");
+
+export const getAgentsByState = (state) =>
+  instance.get("/getAgentsByState?state=" + state);

@@ -23,12 +23,13 @@ import {
   XMarkIcon,
   Cog8ToothIcon,
   CircleStackIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 import { MagnifyingGlassIcon } from "@heroicons/react/20/solid";
-import Agents from "./Agents";
 
 const navigation = [
-  { name: "All Agents", href: "/agents", icon: UsersIcon, current: true },
+  { name: "Home", href: "/home", icon: HomeIcon, current: true },
+  { name: "All Agents", href: "/agents", icon: UsersIcon, current: false },
   {
     name: "Add New Agent",
     href: "/agents/newRecord",

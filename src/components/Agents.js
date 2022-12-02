@@ -9,7 +9,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { Listbox, Transition } from "@headlessui/react";
 import Spinner from "./Spinner";
-import { Navigate } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 
 const perPage = [
   { value: "10", name: "Show 10" },
@@ -52,6 +52,8 @@ const Agents = ({ children }) => {
   const [selectedCity, setSelectedCity] = useState("");
   const [selectedPerPage, setSelectedPerPage] = useState(perPage[4].value);
   const [isFetching, setIsFetching] = useState(false);
+  const urlParams = new URLSearchParams(window.location.search);
+  const stateParam = urlParams.get("state") ? urlParams.get("state") : "";
 
   const handleChangePage = (e) => {
     if (e === "0" || e === "") return;
@@ -127,9 +129,14 @@ const Agents = ({ children }) => {
   };
 
   useEffect(() => {
+    if (stateParam !== "" && stateParam !== null) {
+      const st = stateParam.toUpperCase();
+      setSelectedState(st);
+    } else {
+      getRealtorsData();
+    }
     setIsFetching(true);
     getStatesData();
-    getRealtorsData();
   }, []);
 
   useEffect(() => {
@@ -144,6 +151,7 @@ const Agents = ({ children }) => {
   useEffect(() => {
     refreshData.perPage = selectedPerPage;
     setIsFetching(true);
+
     getRealtorsData();
   }, [selectedPerPage]);
 
@@ -178,6 +186,12 @@ const Agents = ({ children }) => {
   function getStatesData() {
     getStates().then((res) => {
       setStates(res.data.states);
+      const s = document.getElementById("stateDropDown");
+      for (var x = 0; x < s.length; x++) {
+        if (stateParam === s[x].value) {
+          s[x].selected = "sele cted";
+        }
+      }
     });
   }
 
@@ -326,7 +340,11 @@ const Agents = ({ children }) => {
                     Select State
                   </option>
                   {states.map((c) => (
-                    <option key={c.id} value={c.name}>
+                    <option
+                      key={c.id}
+                      value={c.name}
+                      //selected={stateParam === c.name}
+                    >
                       {c.name} - {c.longName}
                     </option>
                   ))}
