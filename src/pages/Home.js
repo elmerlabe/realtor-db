@@ -4,9 +4,9 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import { getAgentsPerState, getDatabaseSummary, getStates } from "../api";
-import Spinner from "./Spinner";
-import Layout from "./Layout";
+import { getAgentsPerState, getDatabaseSummary } from "../api";
+import Spinner from "../components/Spinner";
+import Layout from "../components/Layout";
 
 const cards = [
   { name: "Total Agents", icon: UsersIcon },
@@ -18,7 +18,6 @@ const cards = [
 ];
 
 const Home = () => {
-  const token = localStorage.getItem("token");
   const [dbSummary, setDbSummary] = useState([]);
   const [agentsPerState, setAgentsPerState] = useState([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -123,7 +122,7 @@ const Home = () => {
                             {card.name}
                           </dt>
                           <dd className="font-semibold text-lg">
-                            {dbSummary.length != 0 ? dbSummary[i] : "---"}
+                            {dbSummary.length !== 0 ? dbSummary[i] : "---"}
                           </dd>
                         </dl>
                       </div>

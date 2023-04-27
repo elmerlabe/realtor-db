@@ -33,17 +33,15 @@ export const signin = (username, password) =>
 export const getUserFromToken = (token) =>
   apiInstance.post("/getUserFromToken", { token });
 
-export const getAgentFromId = (id, token) =>
-  apiInstance.post("/getAgentFromId", { id, token });
+export const getAgentFromId = (id) =>
+  apiInstance.post("/getAgentFromId", { id });
 
-export const updateAgentInfo = (token, id, data) =>
-  apiInstance.put("/updateAgentInfo", { token, id, data });
+export const updateAgentInfo = (id, data) =>
+  apiInstance.put("/updateAgentInfo", { id, data });
 
-export const removeAgent = (token, id) =>
-  apiInstance.post("/removeAgent", { token, id });
+export const removeAgent = (id) => apiInstance.post("/removeAgent", { id });
 
-export const addNewAgent = (token, data) =>
-  apiInstance.post("/addNewAgent", { token, data });
+export const addNewAgent = (data) => apiInstance.post("/addNewAgent", { data });
 
 export const getStates = () => apiInstance.get("/getStates");
 

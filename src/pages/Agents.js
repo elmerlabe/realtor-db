@@ -1,16 +1,14 @@
-import { useState, useContext, useEffect, Fragment } from "react";
-import { AuthContext } from "../context";
-import { exportCSV, getCities, getRealtors, getStates } from "../api";
-import Swal from "sweetalert2";
+import { useState, useEffect, Fragment } from "react";
+import { getCities, getRealtors, getStates } from "../api";
 import {
   CheckIcon,
   ChevronUpDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { Listbox, Transition } from "@headlessui/react";
-import Spinner from "./Spinner";
+import Spinner from "../components/Spinner";
 import { Navigate, useParams } from "react-router-dom";
-import Layout from "./Layout";
+import Layout from "../components/Layout";
 
 const perPage = [
   { value: "10", name: "Show 10" },
@@ -33,7 +31,6 @@ const searchList = [
 ];
 
 const Agents = () => {
-  const token = localStorage.getItem("token");
   const [agentList, setAgentList] = useState([]);
   const [refreshData, setRefreshData] = useState({
     page: 1,
@@ -96,18 +93,14 @@ const Agents = () => {
   const handleSearchChange = (e) => {
     let val = e.target.value;
     setSearchVal(val);
-    //setSelectedCity("");
-    //setSelectedState("");
   };
 
   const handleStateChange = (d) => {
-    //setSearchVal("");
     setSelectedCity("");
     setSelectedState(d.target.value);
   };
 
   const handleCityChange = (d) => {
-    //setSearchVal("");
     setSelectedCity(d.target.value);
   };
 
@@ -205,7 +198,6 @@ const Agents = () => {
     setSelectedColumn("");
     setSelectedState("");
     setSelectedCity("");
-    //setSearchVal("");
     setSelectedPerPage(50);
     document.getElementById("searchDropDown").options[0].selected = "selected";
     document.getElementById("stateDropDown").options[0].selected = "selected";

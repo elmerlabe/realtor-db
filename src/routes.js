@@ -1,12 +1,11 @@
-import { Routes, Route, createBrowserRouter } from "react-router-dom";
-import Login from "./components/Login";
-import Logout from "./components/Logout";
-import Sidebar from "./components/Sidebar";
-import Agents from "./components/Agents";
+import { createBrowserRouter } from "react-router-dom";
+import Login from "./pages/Login";
+import Logout from "./pages/Logout";
+import Agents from "./pages/Agents";
 import NewAgent from "./components/NewRecord";
-import Account from "./components/Account";
+import Account from "./pages/Account";
 import NewRecord from "./components/NewRecord";
-import Home from "./components/Home";
+import Home from "./pages/Home";
 import RequireAuth from "./components/RequireAuth";
 
 const routes = createBrowserRouter([

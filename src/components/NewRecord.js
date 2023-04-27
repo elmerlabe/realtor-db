@@ -1,6 +1,5 @@
-import { TrashIcon, ViewColumnsIcon } from "@heroicons/react/24/outline";
-import { useContext, useEffect, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import Swal from "sweetalert2";
 import {
   addNewAgent,
@@ -10,12 +9,9 @@ import {
   removeAgent,
   updateAgentInfo,
 } from "../api";
-import { AuthContext } from "../context";
 import Layout from "./Layout";
 
 const NewRecord = () => {
-  const token = localStorage.getItem("token");
-  const { user } = useContext(AuthContext);
   const { agentId } = useParams();
   const [currentEmail, setCurrentEmail] = useState("");
   const [states, setStates] = useState([]);
@@ -59,7 +55,7 @@ const NewRecord = () => {
     });
 
     if (agentId) {
-      getAgentFromId(agentId, token).then((res) => {
+      getAgentFromId(agentId).then((res) => {
         const d = res.data.data[0];
         setCurrentEmail(d["email"]);
         setFormData({
@@ -98,12 +94,12 @@ const NewRecord = () => {
       return false;
 
     if (agentId) {
-      updateAgentInfo(token, agentId, formData).then((res) => {
+      updateAgentInfo(agentId, formData).then((res) => {
         Swal.fire("Success", res.data.message, "success");
         setCurrentEmail(formData.email);
       });
     } else {
-      addNewAgent(token, formData).then((res) => {
+      addNewAgent(formData).then((res) => {
         if (res.data.result) {
           Swal.fire("Success", res.data.message, "success");
         } else {
@@ -124,7 +120,7 @@ const NewRecord = () => {
       confirmButtonText: "Yes, delete it!",
     }).then((result) => {
       if (result.isConfirmed) {
-        removeAgent(token, agentId)
+        removeAgent(agentId)
           .then((res) => {
             //Swal.fire("Deleted!", "Agent record has been deleted.", "success");
             window.location.href = "/agents";
@@ -258,10 +254,6 @@ const NewRecord = () => {
     } else {
       setEmailChck({ ...emailChck, valid: true, message: "" });
     }
-  }
-
-  if (!user && !token) {
-    return <Navigate to="/login" />;
   }
 
   return (
@@ -650,13 +642,13 @@ const NewRecord = () => {
               <div className="md:mt-5 md:text-right my-auto">
                 {" "}
                 {agentId !== undefined ? (
-                  <a
+                  <span
                     type="button"
                     onClick={handleRemove}
                     className="mr-4 md:w-40 mt-2 text-sm text-red-500 text-decoration-line: underline cursor-pointer"
                   >
                     Delete this record
-                  </a>
+                  </span>
                 ) : null}
               </div>
             </div>

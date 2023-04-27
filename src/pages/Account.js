@@ -3,7 +3,7 @@ import { Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { getUserFromToken, updateUser } from "../api";
 import { AuthContext } from "../context";
-import Layout from "./Layout";
+import Layout from "../components/Layout";
 
 const Account = () => {
   const token = localStorage.getItem("token");
