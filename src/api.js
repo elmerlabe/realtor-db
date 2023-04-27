@@ -5,7 +5,6 @@ export const apiInstance = axios.create({
 });
 
 export const getRealtors = (
-  token,
   page,
   per_page,
   city,
@@ -25,8 +24,7 @@ export const getRealtors = (
       "&search=" +
       search +
       "&selectedColumn=" +
-      selectedColumn,
-    { token }
+      selectedColumn
   );
 
 export const signin = (username, password) =>
@@ -49,12 +47,14 @@ export const addNewAgent = (token, data) =>
 
 export const getStates = () => apiInstance.get("/getStates");
 
-export const getCities = (state) => apiInstance.get("/getCities?state=" + state);
+export const getCities = (state) =>
+  apiInstance.get("/getCities?state=" + state);
 
 export const updateUser = (token, data) =>
   apiInstance.post("/updateUser", { token, data });
 
-export const emailCheck = (email) => apiInstance.get("/emailCheck?email=" + email);
+export const emailCheck = (email) =>
+  apiInstance.get("/emailCheck?email=" + email);
 
 export const getDatabaseSummary = () => apiInstance.get("/getDatabaseSummary");
 

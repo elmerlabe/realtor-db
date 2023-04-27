@@ -157,7 +157,6 @@ const Agents = () => {
 
   function getRealtorsData() {
     getRealtors(
-      token,
       refreshData.page,
       refreshData.perPage,
       selectedCity,
@@ -179,7 +178,8 @@ const Agents = () => {
         });
       })
       .catch((err) => {
-        Swal.fire("Error", "Unable to get data!", "error");
+        console.log(err);
+        //Swal.fire("Error", "Unable to get data!", "error");
       });
   }
 
