@@ -6,13 +6,13 @@ import { signin } from "../api";
 
 const Login = () => {
   const { user, onLogin } = useContext(AuthContext);
-  const token = localStorage.getItem("token");
   const [loginData, setLoginData] = useState({ username: "", password: "" });
+
   const handleSubmitLogin = (e) => {
     e.preventDefault();
     signin(loginData.username, loginData.password).then((res) => {
       console.log(res);
-      if (res.data.token) {
+      if (res.data.result) {
         onLogin(res.data.token);
       } else {
         Swal.fire("Error!", "Invalid username and/or password.", "error");
@@ -20,7 +20,7 @@ const Login = () => {
     });
   };
 
-  if (user || token) {
+  if (user) {
     return <Navigate to="/home" />;
   }
 

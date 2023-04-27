@@ -11,6 +11,7 @@ import {
   updateAgentInfo,
 } from "../api";
 import { AuthContext } from "../context";
+import Layout from "./Layout";
 
 const NewRecord = () => {
   const token = localStorage.getItem("token");
@@ -264,394 +265,405 @@ const NewRecord = () => {
   }
 
   return (
-    <div>
-      <div className="px-4 sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold text-gray-900">
-          {agentId !== undefined ? "Update Record" : "Add New Record"}
-        </h1>
-        <form onSubmit={handleSubmitForm}>
-          <div className="mt-4 grid md:grid-cols-2 md:gap-x-10 gap-y-2 bg-white p-4 md:p-10 xs:-1 shadow rounded-md">
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email
-              </label>
+    <Layout>
+      <div>
+        <div className="px-4 sm:px-6 lg:px-8">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {agentId !== undefined ? "Update Record" : "Add New Record"}
+          </h1>
+          <form onSubmit={handleSubmitForm}>
+            <div className="mt-4 grid md:grid-cols-2 md:gap-x-10 gap-y-2 bg-white p-4 md:p-10 xs:-1 shadow rounded-md">
               <div>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formData.email}
-                  onBlur={(e) => validateEmail(e.target.value)}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className={
-                    (emailChck.message === ""
-                      ? "border-gray-300"
-                      : "border-red-300") +
-                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                  }
-                />
-                {emailChck.valid ? null : (
-                  <small className="text-sm text-red-500">
-                    {emailChck.message}
-                  </small>
-                )}
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="firstName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                First Name
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="firstName"
-                  value={formData.firstName}
-                  onFocus={displayError}
-                  onChange={(e) =>
-                    setFormData({ ...formData, firstName: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="middleName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Middle Name
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="middleName"
-                  value={formData.middleName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, middleName: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="lastName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Last Name
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="lastName"
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, lastName: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="suffix"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Suffix
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="suffix"
-                  value={formData.suffix}
-                  onChange={(e) =>
-                    setFormData({ ...formData, suffix: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="officeName"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office Name
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="officeName"
-                  value={formData.officeName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeName: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="officeAddress1"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office Address 1
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="officeAddress1"
-                  value={formData.officeAddress1}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeAddress1: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="officeAddress2"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office Address 2
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="officeAddress2"
-                  value={formData.officeAddress2}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeAddress2: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="officeCity"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office City
-              </label>
-              <div>
-                <input
-                  type="text"
-                  id="officeCity"
-                  value={formData.officeCity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeCity: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label
-                htmlFor="officeState"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office State
-              </label>
-              <div>
-                <select
-                  id="officeState"
-                  value={formData.officeState}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeState: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  {states.map((s, i) => (
-                    <option key={i} value={s.name}>
-                      {s.longName}
-                    </option>
-                  ))}
-                </select>
+                  Email
+                </label>
+                <div>
+                  <input
+                    type="email"
+                    id="email"
+                    required
+                    value={formData.email}
+                    onBlur={(e) => validateEmail(e.target.value)}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    className={
+                      (emailChck.message === ""
+                        ? "border-gray-300"
+                        : "border-red-300") +
+                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                    }
+                  />
+                  {emailChck.valid ? null : (
+                    <small className="text-sm text-red-500">
+                      {emailChck.message}
+                    </small>
+                  )}
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                htmlFor="officeZip"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office Zip
-              </label>
               <div>
-                <input
-                  type="text"
-                  id="officeZip"
-                  value={formData.officeZip}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeZip: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  First Name
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="firstName"
+                    value={formData.firstName}
+                    onFocus={displayError}
+                    onChange={(e) =>
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                htmlFor="officeCountry"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office Country
-              </label>
               <div>
-                <input
-                  type="text"
-                  id="officeCountry"
-                  value={formData.officeCountry}
-                  onChange={(e) =>
-                    setFormData({ ...formData, officeCountry: e.target.value })
-                  }
-                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                />
+                <label
+                  htmlFor="middleName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Middle Name
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="middleName"
+                    value={formData.middleName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, middleName: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                htmlFor="officePhone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office Phone
-              </label>
               <div>
-                <input
-                  type="text"
-                  id="officePhone"
-                  maxLength={12}
-                  onBlur={(e) => validateNumber(e)}
-                  onKeyDown={(e) => addHypen(e)}
-                  className={
-                    (officePhoneChck.message === ""
-                      ? "border-gray-300"
-                      : "border-red-300") +
-                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                  }
-                />
-                {officePhoneChck.valid ? null : (
-                  <small className="text-sm text-red-500">
-                    {officePhoneChck.message}
-                  </small>
-                )}
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Last Name
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="lastName"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                htmlFor="officeFax"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Office Fax
-              </label>
               <div>
-                <input
-                  type="text"
-                  id="officeFax"
-                  maxLength={12}
-                  onBlur={(e) => validateNumber(e)}
-                  onKeyDown={(e) => addHypen(e)}
-                  className={
-                    (officeFaxChck.message === ""
-                      ? "border-gray-300"
-                      : "border-red-300") +
-                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                  }
-                />
-                {officeFaxChck.valid ? null : (
-                  <small className="text-sm text-red-500">
-                    {officeFaxChck.message}
-                  </small>
-                )}
+                <label
+                  htmlFor="suffix"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Suffix
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="suffix"
+                    value={formData.suffix}
+                    onChange={(e) =>
+                      setFormData({ ...formData, suffix: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label
-                htmlFor="cellPhone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Cell Phone
-              </label>
               <div>
-                <input
-                  type="text"
-                  id="cellPhone"
-                  maxLength={12}
-                  onBlur={(e) => validateNumber(e)}
-                  onKeyDown={(e) => addHypen(e)}
-                  className={
-                    (cellPhoneChck.message === ""
-                      ? "border-gray-300"
-                      : "border-red-300") +
-                    " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
-                  }
-                />
-                {cellPhoneChck.valid ? null : (
-                  <small className="text-sm text-red-500">
-                    {cellPhoneChck.message}
-                  </small>
-                )}
+                <label
+                  htmlFor="officeName"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office Name
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officeName"
+                    value={formData.officeName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, officeName: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
               </div>
-            </div>
-            <div></div>
-            <div className="md:mt-4">
-              <button
-                id="submitbtn"
-                type="submit"
-                className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                {agentId !== undefined ? "Save all" : "Submit"}
-              </button>
 
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.href = "/agents";
-                }}
-                className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-zinc-500 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                Cancel
-              </button>
-            </div>
+              <div>
+                <label
+                  htmlFor="officeAddress1"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office Address 1
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officeAddress1"
+                    value={formData.officeAddress1}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        officeAddress1: e.target.value,
+                      })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
 
-            <div className="md:mt-5 md:text-right my-auto">
-              {" "}
-              {agentId !== undefined ? (
-                <a
+              <div>
+                <label
+                  htmlFor="officeAddress2"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office Address 2
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officeAddress2"
+                    value={formData.officeAddress2}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        officeAddress2: e.target.value,
+                      })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="officeCity"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office City
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officeCity"
+                    value={formData.officeCity}
+                    onChange={(e) =>
+                      setFormData({ ...formData, officeCity: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="officeState"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office State
+                </label>
+                <div>
+                  <select
+                    id="officeState"
+                    value={formData.officeState}
+                    onChange={(e) =>
+                      setFormData({ ...formData, officeState: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  >
+                    {states.map((s, i) => (
+                      <option key={i} value={s.name}>
+                        {s.longName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="officeZip"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office Zip
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officeZip"
+                    value={formData.officeZip}
+                    onChange={(e) =>
+                      setFormData({ ...formData, officeZip: e.target.value })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="officeCountry"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office Country
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officeCountry"
+                    value={formData.officeCountry}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        officeCountry: e.target.value,
+                      })
+                    }
+                    className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="officePhone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office Phone
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officePhone"
+                    maxLength={12}
+                    onBlur={(e) => validateNumber(e)}
+                    onKeyDown={(e) => addHypen(e)}
+                    className={
+                      (officePhoneChck.message === ""
+                        ? "border-gray-300"
+                        : "border-red-300") +
+                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                    }
+                  />
+                  {officePhoneChck.valid ? null : (
+                    <small className="text-sm text-red-500">
+                      {officePhoneChck.message}
+                    </small>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="officeFax"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Office Fax
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="officeFax"
+                    maxLength={12}
+                    onBlur={(e) => validateNumber(e)}
+                    onKeyDown={(e) => addHypen(e)}
+                    className={
+                      (officeFaxChck.message === ""
+                        ? "border-gray-300"
+                        : "border-red-300") +
+                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                    }
+                  />
+                  {officeFaxChck.valid ? null : (
+                    <small className="text-sm text-red-500">
+                      {officeFaxChck.message}
+                    </small>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="cellPhone"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Cell Phone
+                </label>
+                <div>
+                  <input
+                    type="text"
+                    id="cellPhone"
+                    maxLength={12}
+                    onBlur={(e) => validateNumber(e)}
+                    onKeyDown={(e) => addHypen(e)}
+                    className={
+                      (cellPhoneChck.message === ""
+                        ? "border-gray-300"
+                        : "border-red-300") +
+                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                    }
+                  />
+                  {cellPhoneChck.valid ? null : (
+                    <small className="text-sm text-red-500">
+                      {cellPhoneChck.message}
+                    </small>
+                  )}
+                </div>
+              </div>
+              <div></div>
+              <div className="md:mt-4">
+                <button
+                  id="submitbtn"
+                  type="submit"
+                  className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  {agentId !== undefined ? "Save all" : "Submit"}
+                </button>
+
+                <button
                   type="button"
-                  onClick={handleRemove}
-                  className="mr-4 md:w-40 mt-2 text-sm text-red-500 text-decoration-line: underline cursor-pointer"
+                  onClick={() => {
+                    window.location.href = "/agents";
+                  }}
+                  className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-zinc-500 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                  Delete this record
-                </a>
-              ) : null}
+                  Cancel
+                </button>
+              </div>
+
+              <div className="md:mt-5 md:text-right my-auto">
+                {" "}
+                {agentId !== undefined ? (
+                  <a
+                    type="button"
+                    onClick={handleRemove}
+                    className="mr-4 md:w-40 mt-2 text-sm text-red-500 text-decoration-line: underline cursor-pointer"
+                  >
+                    Delete this record
+                  </a>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

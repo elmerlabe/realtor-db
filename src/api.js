@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const instance = axios.create({
+export const apiInstance = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
 });
 
@@ -13,7 +13,7 @@ export const getRealtors = (
   search,
   selectedColumn
 ) =>
-  instance.post(
+  apiInstance.post(
     "/getRealtors?page=" +
       page +
       "&per_page=" +
@@ -30,35 +30,35 @@ export const getRealtors = (
   );
 
 export const signin = (username, password) =>
-  instance.post("/signin", { username, password });
+  apiInstance.post("/signin", { username, password });
 
 export const getUserFromToken = (token) =>
-  instance.post("/getUserFromToken", { token });
+  apiInstance.post("/getUserFromToken", { token });
 
 export const getAgentFromId = (id, token) =>
-  instance.post("/getAgentFromId", { id, token });
+  apiInstance.post("/getAgentFromId", { id, token });
 
 export const updateAgentInfo = (token, id, data) =>
-  instance.put("/updateAgentInfo", { token, id, data });
+  apiInstance.put("/updateAgentInfo", { token, id, data });
 
 export const removeAgent = (token, id) =>
-  instance.post("/removeAgent", { token, id });
+  apiInstance.post("/removeAgent", { token, id });
 
 export const addNewAgent = (token, data) =>
-  instance.post("/addNewAgent", { token, data });
+  apiInstance.post("/addNewAgent", { token, data });
 
-export const getStates = () => instance.get("/getStates");
+export const getStates = () => apiInstance.get("/getStates");
 
-export const getCities = (state) => instance.get("/getCities?state=" + state);
+export const getCities = (state) => apiInstance.get("/getCities?state=" + state);
 
 export const updateUser = (token, data) =>
-  instance.post("/updateUser", { token, data });
+  apiInstance.post("/updateUser", { token, data });
 
-export const emailCheck = (email) => instance.get("/emailCheck?email=" + email);
+export const emailCheck = (email) => apiInstance.get("/emailCheck?email=" + email);
 
-export const getDatabaseSummary = () => instance.get("/getDatabaseSummary");
+export const getDatabaseSummary = () => apiInstance.get("/getDatabaseSummary");
 
-export const getAgentsPerState = () => instance.get("/getAgentsPerState");
+export const getAgentsPerState = () => apiInstance.get("/getAgentsPerState");
 
 export const getAgentsByState = (state) =>
-  instance.get("/getAgentsByState?state=" + state);
+  apiInstance.get("/getAgentsByState?state=" + state);

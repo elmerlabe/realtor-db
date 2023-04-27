@@ -1,10 +1,6 @@
 import { AuthProvider } from "./context";
 import AppRoutes from "./routes";
 
-const App = () => (
-  <AuthProvider>
-    <AppRoutes />
-  </AuthProvider>
-);
+const App = () => <div></div>;
 
 export default App;
