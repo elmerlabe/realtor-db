@@ -9,9 +9,11 @@ import routes from "./routes";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <AuthProvider>
-    <RouterProvider router={routes} />
-  </AuthProvider>
+  <React.StrictMode>
+    <AuthProvider>
+      <RouterProvider router={routes} />
+    </AuthProvider>
+  </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
