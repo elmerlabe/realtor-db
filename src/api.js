@@ -56,7 +56,8 @@ export const emailCheck = (email) =>
 
 export const getDatabaseSummary = () => apiInstance.get("/getDatabaseSummary");
 
-export const getAgentsPerState = () => apiInstance.get("/getAgentsPerState");
+export const getAgentsPerState = (state) =>
+  apiInstance.get("/getAgentsPerState/" + state);
 
 export const getAgentsByState = (state) =>
   apiInstance.get("/getAgentsByState?state=" + state);

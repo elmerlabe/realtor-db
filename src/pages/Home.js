@@ -4,9 +4,10 @@ import {
   UsersIcon,
 } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
-import { getAgentsPerState, getDatabaseSummary } from "../api";
+import { getAgentsPerState, getDatabaseSummary, getStates } from "../api";
 import Spinner from "../components/Spinner";
 import Layout from "../components/Layout";
+import { States } from "../data";
 
 const cards = [
   { name: "Total Agents", icon: UsersIcon },
@@ -19,22 +20,45 @@ const cards = [
 
 const Home = () => {
   const [dbSummary, setDbSummary] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
   const [agentsPerState, setAgentsPerState] = useState([]);
-  const [isFetching, setIsFetching] = useState(false);
 
   useEffect(() => {
     getDatabaseSummary().then((res) => {
       const d = res.data;
       setDbSummary([d.agents, d.emails, d.phones]);
     });
-    setIsFetching(true);
-    getAgentsPerState().then((res) => {
-      setAgentsPerState(res.data.agentsPerState);
-      setIsFetching(false);
+
+    States.map((state, i) => {
+      getAgentsPerState(state.name)
+        .then((res) => {
+          agentsPerState[i] = res.data.ttlAgentPerState;
+        })
+        .finally(() => {
+          checkSameLeght();
+
+          const table = document.getElementById("myTable");
+          const rows = table.rows;
+
+          for (let i = 1; i < agentsPerState.length + 1; i++) {
+            if (agentsPerState[i - 1] !== undefined) {
+              let x = rows[i].getElementsByTagName("td")[2];
+              x.innerHTML = agentsPerState[i - 1];
+            }
+          }
+        });
     });
   }, []);
 
+  function checkSameLeght() {
+    if (agentsPerState.length === States.length) {
+      setIsFetching(false);
+    }
+  }
+
   function sortTable(n, type) {
+    if (isFetching) return false;
+
     let table,
       rows,
       switching,
@@ -133,93 +157,91 @@ const Home = () => {
               ))}
             </div>
 
-            <h2 className="mt-10 text-lg max-w-6xl font-medium leading-6 text-gray-900">
-              Number of agents per state
-            </h2>
+            <div className="flex mt-10 items-center">
+              <h2 className="mr-3 text-lg max-w-6xl font-medium leading-6 text-gray-900">
+                Number of agents per state:
+              </h2>
+              {isFetching ? <Spinner size={5} /> : null}
+            </div>
+
             <div className="mt-2">
               <div className="mx-auto">
                 <div className="flex flex-col">
-                  {isFetching ? (
-                    <div className="flex justify-center p-40">
-                      <Spinner size={16} />
-                    </div>
-                  ) : (
-                    <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
-                      <table
-                        id="myTable"
-                        className="min-w-full divide-y divide-gray-300"
-                      >
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-sm font-semibold text-gray-900"
-                            >
-                              <div className="flex items-center">
-                                State
-                                <button onClick={() => sortTable(0, "str")}>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="ml-1 w-3 h-3"
-                                    aria-hidden="true"
-                                    fill="currentColor"
-                                    viewBox="0 0 320 512"
-                                  >
-                                    <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-sm font-semibold text-gray-900"
-                            >
-                              -
-                            </th>
-                            <th
-                              scope="col"
-                              className="px-6 py-3 text-left text-sm font-semibold text-gray-900"
-                            >
-                              <div className="flex items-center">
-                                Agents
-                                <button onClick={() => sortTable(2, "num")}>
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="ml-1 w-3 h-3"
-                                    aria-hidden="true"
-                                    fill="currentColor"
-                                    viewBox="0 0 320 512"
-                                  >
-                                    <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
-                                  </svg>
-                                </button>
-                              </div>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                          {agentsPerState.map((state, i) => (
-                            <tr key={state.id} className="hover:bg-gray-100">
-                              <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                                <a
-                                  href={"/agents?state=" + state.name}
-                                  className="hover:text-blue-500"
+                  <div className="min-w-full overflow-hidden overflow-x-auto align-middle shadow sm:rounded-lg">
+                    <table
+                      id="myTable"
+                      className="min-w-full divide-y divide-gray-300"
+                    >
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-sm font-semibold text-gray-900"
+                          >
+                            <div className="flex items-center">
+                              State
+                              <button onClick={() => sortTable(0, "str")}>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="ml-1 w-3 h-3"
+                                  aria-hidden="true"
+                                  fill="currentColor"
+                                  viewBox="0 0 320 512"
                                 >
-                                  {state.longName}
-                                </a>
-                              </td>
-                              <td className="md:w-1/2 max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                                {state.name}
-                              </td>
-                              <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900 font-semibold">
-                                {state.totalAgents}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                                  <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                                </svg>
+                              </button>
+                            </div>
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-sm font-semibold text-gray-900"
+                          >
+                            -
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3 text-left text-sm font-semibold text-gray-900"
+                          >
+                            <div className="flex items-center">
+                              Agents
+                              <button onClick={() => sortTable(2, "num")}>
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  className="ml-1 w-3 h-3"
+                                  aria-hidden="true"
+                                  fill="currentColor"
+                                  viewBox="0 0 320 512"
+                                >
+                                  <path d="M27.66 224h264.7c24.6 0 36.89-29.78 19.54-47.12l-132.3-136.8c-5.406-5.406-12.47-8.107-19.53-8.107c-7.055 0-14.09 2.701-19.45 8.107L8.119 176.9C-9.229 194.2 3.055 224 27.66 224zM292.3 288H27.66c-24.6 0-36.89 29.77-19.54 47.12l132.5 136.8C145.9 477.3 152.1 480 160 480c7.053 0 14.12-2.703 19.53-8.109l132.3-136.8C329.2 317.8 316.9 288 292.3 288z" />
+                                </svg>
+                              </button>
+                            </div>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {States.map((state, i) => (
+                          <tr key={i} className="hover:bg-gray-100">
+                            <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                              <a
+                                href={"/agents?state=" + state.name}
+                                className="hover:text-blue-500"
+                              >
+                                {state.longName}
+                              </a>
+                            </td>
+                            <td className="md:w-1/2 max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                              {state.name}
+                            </td>
+                            <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900 font-semibold">
+                              --
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
