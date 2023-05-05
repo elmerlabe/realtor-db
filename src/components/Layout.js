@@ -1,9 +1,9 @@
-import Sidebar from "../components/Sidebar";
+import Navbar from "./Navbar";
 
 const Layout = ({ children }) => {
   return (
     <div>
-      <Sidebar children={children} />
+      <Navbar children={children} />
     </div>
   );
 };
