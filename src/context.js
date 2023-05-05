@@ -27,7 +27,7 @@ const AuthProvider = ({ children }) => {
         .then((res) => {
           if (res.data.user) {
             localStorage.setItem("token", token);
-            setUser(res.data.user);
+            setUser(res.data);
             apiInstance.defaults.headers.common[
               "Authorization"
             ] = `Bearer ${token}`;
