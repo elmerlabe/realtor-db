@@ -7,7 +7,12 @@ import Layout from "../components/Layout";
 
 const Account = () => {
   const token = localStorage.getItem("token");
-  const [formSecur, setFormSecur] = useState({ username: "", password: "" });
+  const [formSecur, setFormSecur] = useState({
+    name: "",
+    email: "",
+    username: "",
+    password: "",
+  });
 
   function showPassword(e) {
     if (e.target.checked) {
@@ -28,8 +33,12 @@ const Account = () => {
 
   useEffect(() => {
     getUserFromToken(token).then((res) => {
-      console.log(res);
-      setFormSecur({ ...formSecur, username: res.data.user });
+      setFormSecur({
+        ...formSecur,
+        name: res.data.name,
+        email: res.data.email,
+        username: res.data.user,
+      });
     });
   }, []);
 
@@ -45,7 +54,51 @@ const Account = () => {
             Security Settings
           </h1>
           <form onSubmit={handleFormSecurSubmit}>
-            <div className="md:w-1/3 grid md:grid-cols-1 bg-white p-4 shadow rounded-md">
+            <div className="md:w-1/3 grid md:grid-cols-1 bg-white p-6 shadow rounded-md">
+              <div className="mb-4">
+                <label
+                  htmlFor="name"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Name
+                </label>
+                <input
+                  required
+                  value={formSecur.name}
+                  onChange={(e) =>
+                    setFormSecur({
+                      ...formSecur,
+                      name: e.target.value,
+                    })
+                  }
+                  id="name"
+                  type="text"
+                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                ></input>
+              </div>
+
+              <div className="mb-4">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Email
+                </label>
+                <input
+                  required
+                  value={formSecur.email}
+                  onChange={(e) =>
+                    setFormSecur({
+                      ...formSecur,
+                      email: e.target.value,
+                    })
+                  }
+                  id="email"
+                  type="email"
+                  className="block w-full text-sm px-3 py-2 rounded-md border border-gray-300 shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                ></input>
+              </div>
+
               <div className="mb-4">
                 <label
                   htmlFor="username"
