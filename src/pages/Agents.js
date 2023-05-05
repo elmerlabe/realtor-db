@@ -289,7 +289,7 @@ const Agents = () => {
                     className="text-sm p-2 text-gray-900 bg-white-500 rounded-tl-md rounded-bl-md border border-gray-300 outline-none"
                   >
                     <option className="font-semibold" value="">
-                      Select search
+                      Search by
                     </option>
                     {searchList.map((info, i) => (
                       <option key={i} value={info.value}>
@@ -636,6 +636,8 @@ const Agents = () => {
                           </div>
                         </th>
 
+                        <th scope="col" className="px-3 py-3.5"></th>
+
                         <th
                           scope="col"
                           className="relative py-3.5 pl-3 pr-4 sm:pr-6"
@@ -646,12 +648,22 @@ const Agents = () => {
                       {agentList.map((agent) => (
                         <tr key={agent._id} className="hover:bg-gray-100">
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {agent.firstName}
+                            <a
+                              href={`/agents/${agent._id}`}
+                              className="hover:text-blue-500"
+                            >
+                              {agent.firstName}
+                            </a>
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {agent.lastName}
+                            <a
+                              href={`/agents/${agent._id}`}
+                              className="hover:text-blue-500"
+                            >
+                              {agent.lastName}
+                            </a>
                           </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <td className=" px-3 py-4 text-sm text-gray-500">
                             {agent.officeName}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
@@ -672,6 +684,21 @@ const Agents = () => {
                               href={`mailto: ${agent.email}`}
                             >
                               {agent.email}
+                            </a>
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-xs text-white">
+                            <a
+                              href={
+                                `//` +
+                                agent.email.substring(
+                                  agent.email.indexOf("@") + 1,
+                                  agent.email.length
+                                )
+                              }
+                              target="_blank"
+                              className="bg-green-500 hover:bg-green-600 hover:text-slate-200 p-1 px-2 rounded-md"
+                            >
+                              Visit Site
                             </a>
                           </td>
                           <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
