@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-import Swal from "sweetalert2";
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import {
   addNewAgent,
   emailCheck,
@@ -8,45 +8,46 @@ import {
   getStates,
   removeAgent,
   updateAgentInfo,
-} from "../api";
-import Layout from "./Layout";
+} from '../api';
+import Layout from './Layout';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 const NewRecord = () => {
   const { agentId } = useParams();
-  const [currentEmail, setCurrentEmail] = useState("");
+  const navigate = useNavigate();
+  const [currentEmail, setCurrentEmail] = useState('');
   const [states, setStates] = useState([]);
-
-  const errorMsg = "* Please enter a valid phone number";
-  const [emailChck, setEmailChck] = useState({ valid: true, message: "" });
+  const errorMsg = '* Please enter a valid phone number';
+  const [emailChck, setEmailChck] = useState({ valid: true, message: '' });
   const [officePhoneChck, setOfficePhoneChck] = useState({
     valid: true,
-    message: "",
+    message: '',
   });
   const [officeFaxChck, setOfficeFaxChck] = useState({
     valid: true,
-    message: "",
+    message: '',
   });
   const [cellPhoneChck, setCellPhoneChck] = useState({
     valid: true,
-    message: "",
+    message: '',
   });
 
   const [formData, setFormData] = useState({
-    email: "",
-    firstName: "",
-    middleName: "",
-    lastName: "",
-    suffix: "",
-    officeName: "",
-    officeAddress1: "",
-    officeAddress2: "",
-    officeCity: "",
-    officeState: "",
-    officeZip: "",
-    officeCountry: "",
-    officePhone: "",
-    officeFax: "",
-    cellPhone: "",
+    email: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    suffix: '',
+    officeName: '',
+    officeAddress1: '',
+    officeAddress2: '',
+    officeCity: '',
+    officeState: '',
+    officeZip: '',
+    officeCountry: '',
+    officePhone: '',
+    officeFax: '',
+    cellPhone: '',
   });
 
   useEffect(() => {
@@ -57,27 +58,27 @@ const NewRecord = () => {
     if (agentId) {
       getAgentFromId(agentId).then((res) => {
         const d = res.data.data[0];
-        setCurrentEmail(d["email"]);
+        setCurrentEmail(d['email']);
         setFormData({
-          email: d["email"],
-          firstName: d["firstName"],
-          middleName: d["middleName"],
-          lastName: d["lastName"],
-          suffix: d["suffix"],
-          officeName: d["officeName"],
-          officeAddress1: d["officeAddress1"],
-          officeAddress2: d["officeAddress2"],
-          officeCity: d["officeCity"],
-          officeState: d["officeState"],
-          officeZip: d["officeZip"],
-          officeCountry: d["officeCountry"],
-          officePhone: d["officePhone"],
-          officeFax: d["officeFax"],
-          cellPhone: d["cellPhone"],
+          email: d['email'],
+          firstName: d['firstName'],
+          middleName: d['middleName'],
+          lastName: d['lastName'],
+          suffix: d['suffix'],
+          officeName: d['officeName'],
+          officeAddress1: d['officeAddress1'],
+          officeAddress2: d['officeAddress2'],
+          officeCity: d['officeCity'],
+          officeState: d['officeState'],
+          officeZip: d['officeZip'],
+          officeCountry: d['officeCountry'],
+          officePhone: d['officePhone'],
+          officeFax: d['officeFax'],
+          cellPhone: d['cellPhone'],
         });
-        document.getElementById("officePhone").value = d["officePhone"];
-        document.getElementById("officeFax").value = d["officeFax"];
-        document.getElementById("cellPhone").value = d["cellPhone"];
+        document.getElementById('officePhone').value = d['officePhone'];
+        document.getElementById('officeFax').value = d['officeFax'];
+        document.getElementById('cellPhone').value = d['cellPhone'];
       });
     }
   }, []);
@@ -95,15 +96,15 @@ const NewRecord = () => {
 
     if (agentId) {
       updateAgentInfo(agentId, formData).then((res) => {
-        Swal.fire("Success", res.data.message, "success");
+        Swal.fire('Success', res.data.message, 'success');
         setCurrentEmail(formData.email);
       });
     } else {
       addNewAgent(formData).then((res) => {
         if (res.data.result) {
-          Swal.fire("Success", res.data.message, "success");
+          Swal.fire('Success', res.data.message, 'success');
         } else {
-          Swal.fire("Error", res.data.message, "error");
+          Swal.fire('Error', res.data.message, 'error');
         }
       });
     }
@@ -111,25 +112,33 @@ const NewRecord = () => {
 
   const handleRemove = () => {
     Swal.fire({
-      title: "Are you sure?",
+      title: 'Are you sure?',
       text: "You won't be able to revert this!",
-      icon: "warning",
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
     }).then((result) => {
       if (result.isConfirmed) {
         removeAgent(agentId)
           .then((res) => {
             //Swal.fire("Deleted!", "Agent record has been deleted.", "success");
-            window.location.href = "/agents";
+            window.location.href = '/agents';
           })
           .catch((res) => {
             console.log(res);
           });
       }
     });
+  };
+
+  const handleBack = () => {
+    if (window.history.length > 2) {
+      window.history.back();
+    } else {
+      navigate('/agents');
+    }
   };
 
   function checkPhoneNumber(number) {
@@ -150,10 +159,10 @@ const NewRecord = () => {
     if (isNaN(key)) return;
 
     if (
-      e.key !== "Backspace" &&
+      e.key !== 'Backspace' &&
       (input.value.length === 3 || input.value.length === 7)
     ) {
-      input.value += "-";
+      input.value += '-';
     }
   }
 
@@ -190,12 +199,12 @@ const NewRecord = () => {
     const id = e.target.id;
     const val = e.target.value;
 
-    if (id === "cellPhone") {
+    if (id === 'cellPhone') {
       if (checkPhoneNumber(val)) {
         setCellPhoneChck({
           ...formData,
           valid: true,
-          message: "",
+          message: '',
         });
         setFormData({ ...formData, cellPhone: val });
       } else {
@@ -205,12 +214,12 @@ const NewRecord = () => {
           message: errorMsg,
         });
       }
-    } else if (id === "officeFax") {
+    } else if (id === 'officeFax') {
       if (checkPhoneNumber(val)) {
         setOfficeFaxChck({
           ...formData,
           valid: true,
-          message: "",
+          message: '',
         });
         setFormData({ ...formData, officeFax: val });
       } else {
@@ -220,12 +229,12 @@ const NewRecord = () => {
           message: errorMsg,
         });
       }
-    } else if (id === "officePhone") {
+    } else if (id === 'officePhone') {
       if (checkPhoneNumber(val)) {
         setOfficePhoneChck({
           ...formData,
           valid: true,
-          message: "",
+          message: '',
         });
         setFormData({ ...formData, officePhone: val });
       } else {
@@ -239,20 +248,20 @@ const NewRecord = () => {
   }
 
   function validateEmail(email) {
-    if (email !== "" && currentEmail !== email) {
+    if (email !== '' && currentEmail !== email) {
       emailCheck(email).then((res) => {
         if (res.data.result) {
-          setEmailChck({ ...emailChck, valid: true, message: "" });
+          setEmailChck({ ...emailChck, valid: true, message: '' });
         } else {
           setEmailChck({
             ...emailChck,
             valid: false,
-            message: "* " + res.data.message,
+            message: '* ' + res.data.message,
           });
         }
       });
     } else {
-      setEmailChck({ ...emailChck, valid: true, message: "" });
+      setEmailChck({ ...emailChck, valid: true, message: '' });
     }
   }
 
@@ -260,8 +269,16 @@ const NewRecord = () => {
     <Layout>
       <div>
         <div className="px-4 sm:px-6 lg:px-8">
+          <div
+            onClick={handleBack}
+            className="flex items-center cursor-pointer hover:text-blue-500 font-semibold text-xl mb-3"
+          >
+            <ArrowLeftIcon className="h-5 w-5 mr-2 mt-1" />
+            <span>Back</span>
+          </div>
+
           <h1 className="text-2xl font-bold text-gray-900">
-            {agentId !== undefined ? "Update Record" : "Add New Record"}
+            {agentId !== undefined ? 'Update Record' : 'Add New Record'}
           </h1>
           <form onSubmit={handleSubmitForm}>
             <div className="mt-4 grid md:grid-cols-2 md:gap-x-10 gap-y-2 bg-white p-4 md:p-10 xs:-1 shadow rounded-md">
@@ -283,10 +300,10 @@ const NewRecord = () => {
                       setFormData({ ...formData, email: e.target.value })
                     }
                     className={
-                      (emailChck.message === ""
-                        ? "border-gray-300"
-                        : "border-red-300") +
-                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                      (emailChck.message === ''
+                        ? 'border-gray-300'
+                        : 'border-red-300') +
+                      ' block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500'
                     }
                   />
                   {emailChck.valid ? null : (
@@ -547,10 +564,10 @@ const NewRecord = () => {
                     onBlur={(e) => validateNumber(e)}
                     onKeyDown={(e) => addHypen(e)}
                     className={
-                      (officePhoneChck.message === ""
-                        ? "border-gray-300"
-                        : "border-red-300") +
-                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                      (officePhoneChck.message === ''
+                        ? 'border-gray-300'
+                        : 'border-red-300') +
+                      ' block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500'
                     }
                   />
                   {officePhoneChck.valid ? null : (
@@ -576,10 +593,10 @@ const NewRecord = () => {
                     onBlur={(e) => validateNumber(e)}
                     onKeyDown={(e) => addHypen(e)}
                     className={
-                      (officeFaxChck.message === ""
-                        ? "border-gray-300"
-                        : "border-red-300") +
-                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                      (officeFaxChck.message === ''
+                        ? 'border-gray-300'
+                        : 'border-red-300') +
+                      ' block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500'
                     }
                   />
                   {officeFaxChck.valid ? null : (
@@ -605,10 +622,10 @@ const NewRecord = () => {
                     onBlur={(e) => validateNumber(e)}
                     onKeyDown={(e) => addHypen(e)}
                     className={
-                      (cellPhoneChck.message === ""
-                        ? "border-gray-300"
-                        : "border-red-300") +
-                      " block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500"
+                      (cellPhoneChck.message === ''
+                        ? 'border-gray-300'
+                        : 'border-red-300') +
+                      ' block w-full text-sm px-3 py-2 rounded-md border shadow-sm outline-indigo-800 focus:border-indigo-500 focus:ring-indigo-500'
                     }
                   />
                   {cellPhoneChck.valid ? null : (
@@ -625,14 +642,12 @@ const NewRecord = () => {
                   type="submit"
                   className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                  {agentId !== undefined ? "Save all" : "Submit"}
+                  {agentId !== undefined ? 'Save all' : 'Submit'}
                 </button>
 
                 <button
                   type="button"
-                  onClick={() => {
-                    window.location.href = "/agents";
-                  }}
+                  onClick={handleBack}
                   className="mr-4 md:w-40 tracking-widest items-center rounded-md border border-transparent bg-zinc-500 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-zinc-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
                   Cancel
@@ -640,7 +655,7 @@ const NewRecord = () => {
               </div>
 
               <div className="md:mt-5 md:text-right my-auto">
-                {" "}
+                {' '}
                 {agentId !== undefined ? (
                   <span
                     type="button"
