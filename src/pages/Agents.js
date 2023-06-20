@@ -1,33 +1,33 @@
-import { useState, useEffect, Fragment } from "react";
-import { getCities, getRealtors, getStates } from "../api";
+import { useState, useEffect, Fragment } from 'react';
+import { getCities, getRealtors, getStates } from '../api';
 import {
   CheckIcon,
   ChevronUpDownIcon,
   MagnifyingGlassIcon,
-} from "@heroicons/react/24/outline";
-import { Listbox, Transition } from "@headlessui/react";
-import Spinner from "../components/Spinner";
-import { Navigate, useParams } from "react-router-dom";
-import Layout from "../components/Layout";
+} from '@heroicons/react/24/outline';
+import { Listbox, Transition } from '@headlessui/react';
+import Spinner from '../components/Spinner';
+import { useNavigate, useParams } from 'react-router-dom';
+import Layout from '../components/Layout';
 
 const perPage = [
-  { value: "10", name: "Show 10" },
-  { value: "20", name: "Show 20" },
-  { value: "30", name: "Show 30" },
-  { value: "40", name: "Show 40" },
-  { value: "50", name: "Show 50" },
-  { value: "100", name: "Show 100" },
+  { value: '10', name: 'Show 10' },
+  { value: '20', name: 'Show 20' },
+  { value: '30', name: 'Show 30' },
+  { value: '40', name: 'Show 40' },
+  { value: '50', name: 'Show 50' },
+  { value: '100', name: 'Show 100' },
 ];
 
 const searchList = [
-  { value: "name", name: "Name" },
-  { value: "email", name: "Email" },
-  { value: "officeName", name: "Company" },
-  { value: "officeAddress", name: "Address" },
-  { value: "phoneNumber", name: "Phone Number" },
-  { value: "officeZip", name: "Zip Code" },
-  { value: "officeCity", name: "City" },
-  { value: "officeCountry", name: "Country" },
+  { value: 'name', name: 'Name' },
+  { value: 'email', name: 'Email' },
+  { value: 'officeName', name: 'Company' },
+  { value: 'officeAddress', name: 'Address' },
+  { value: 'phoneNumber', name: 'Phone Number' },
+  { value: 'officeZip', name: 'Zip Code' },
+  { value: 'officeCity', name: 'City' },
+  { value: 'officeCountry', name: 'Country' },
 ];
 
 const Agents = () => {
@@ -40,20 +40,20 @@ const Agents = () => {
     prevPage: 0,
     total: 0,
   });
-  const [searchVal, setSearchVal] = useState("");
+  const [searchVal, setSearchVal] = useState('');
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-
-  const [selectedColumn, setSelectedColumn] = useState("");
-  const [selectedState, setSelectedState] = useState("");
-  const [selectedCity, setSelectedCity] = useState("");
+  const [selectedColumn, setSelectedColumn] = useState('');
+  const [selectedState, setSelectedState] = useState('');
+  const [selectedCity, setSelectedCity] = useState('');
   const [selectedPerPage, setSelectedPerPage] = useState(perPage[4].value);
   const [isFetching, setIsFetching] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
-  const stateParam = urlParams.get("state") ? urlParams.get("state") : "";
+  const stateParam = urlParams.get('state') ? urlParams.get('state') : '';
+  const navigate = useNavigate();
 
   const handleChangePage = (e) => {
-    if (e === "0" || e === "") return;
+    if (e === '0' || e === '') return;
     refreshData.page = e;
     getRealtorsData();
   };
@@ -72,83 +72,116 @@ const Agents = () => {
     getRealtorsData();
   };
 
+  const handleColumnChange = (e) => {
+    const val = e.target.value;
+    setSelectedColumn(val);
+    updateUrl();
+  };
+
   const handleSearch = (e, type) => {
-    if (e.which === 13 && type === "") {
+    if (e.which === 13 && type === '') {
       let val = e.target.value;
       e.preventDefault();
-      if (val === "") return;
+      if (val === '') return;
       setIsFetching(true);
       refreshData.page = 1;
       setSearchVal(val);
+      updateUrl();
       getRealtorsData();
     }
-    if (type === "btnSearch") {
-      if (searchVal === "") return;
+    if (type === 'btnSearch') {
+      if (searchVal === '') return;
       setIsFetching(true);
       refreshData.page = 1;
+      updateUrl();
       getRealtorsData();
     }
   };
 
   const handleSearchChange = (e) => {
-    let val = e.target.value;
+    const val = e.target.value;
     setSearchVal(val);
   };
 
-  const handleStateChange = (d) => {
-    setSelectedCity("");
-    setSelectedState(d.target.value);
+  const handleStateChange = (e) => {
+    const val = e.target.value;
+    setSelectedCity('');
+    setSelectedState(val);
+    refreshData.page = 1;
   };
 
-  const handleCityChange = (d) => {
-    setSelectedCity(d.target.value);
+  const handleCityChange = (e) => {
+    const val = e.target.value;
+    setSelectedCity(val);
   };
 
-  const handleSelectPerPage = (d) => {
-    setSelectedPerPage(d.target.value);
+  const handleSelectPerPage = (e) => {
+    const val = e.target.value;
+    setSelectedPerPage(val);
+    refreshData.perPage = val;
+    refreshData.page = 1;
   };
 
   const handleExportCSV = (e) => {
-    if (selectedState === "") return;
+    if (selectedState === '') return;
     e.target.disabled = true;
     let url =
       process.env.REACT_APP_API_URL +
-      "/exportCSV?state=" +
+      '/exportCSV?state=' +
       selectedState +
-      "&city=" +
+      '&city=' +
       selectedCity;
-    window.open(url, "_blank");
+    window.open(url, '_blank');
     e.target.disabled = false;
   };
 
   useEffect(() => {
-    if (stateParam !== "" && stateParam !== null) {
+    if (stateParam !== '' && stateParam !== null) {
       const st = stateParam.toUpperCase();
       setSelectedState(st);
-    } else {
-      getRealtorsData();
     }
-    setIsFetching(true);
+    if (urlParams.get('city')) {
+      setSelectedCity(urlParams.get('city'));
+    }
+
+    if (urlParams.get('perPage')) {
+      refreshData.perPage = Number(urlParams.get('perPage'));
+      setSelectedPerPage(Number(urlParams.get('perPage')));
+    }
+    if (urlParams.get('page')) {
+      refreshData.page = urlParams.get('page');
+    }
+    if (urlParams.get('column')) {
+      setSelectedColumn(urlParams.get('column'));
+    }
+    if (urlParams.get('search')) {
+      setSearchVal(urlParams.get('search'));
+    }
     getStatesData();
   }, []);
 
   useEffect(() => {
-    refreshData.page = 1;
-    if (selectedState !== "") {
-      setIsFetching(true);
-      getRealtorsData();
-      getCitiesData();
-    }
-  }, [selectedState, selectedCity]);
-
-  useEffect(() => {
-    refreshData.perPage = selectedPerPage;
-    setIsFetching(true);
-
+    updateUrl();
     getRealtorsData();
-  }, [selectedPerPage]);
+  }, [selectedState, selectedCity, selectedPerPage, refreshData.page]);
+
+  function updateUrl() {
+    const searchParams = new URLSearchParams();
+    searchParams.append('column', selectedColumn);
+    searchParams.append('state', selectedState);
+    searchParams.append('city', selectedCity);
+    searchParams.append('perPage', selectedPerPage);
+    searchParams.append('page', refreshData.page);
+    searchParams.append('search', searchVal);
+    navigate(`?${searchParams.toString()}`);
+  }
 
   function getRealtorsData() {
+    if (selectedState !== '') {
+      getCitiesData();
+    }
+    setIsFetching(true);
+    setAgentList([]);
     getRealtors(
       refreshData.page,
       refreshData.perPage,
@@ -163,12 +196,13 @@ const Agents = () => {
         setAgentList(res.data.realtors);
         setRefreshData({
           ...refreshData,
-          page: res.data.page,
+          //page: res.data.page,
           pages: res.data.pages,
           nextPage: res.data.next_page,
           prevPage: res.data.prev_page,
           total: res.data.total,
         });
+        setIsFetching(false);
       })
       .catch((err) => {
         console.log(err);
@@ -179,10 +213,10 @@ const Agents = () => {
   function getStatesData() {
     getStates().then((res) => {
       setStates(res.data.states);
-      const s = document.getElementById("stateDropDown");
+      const s = document.getElementById('stateDropDown');
       for (var x = 0; x < s.length; x++) {
         if (stateParam === s[x].value) {
-          s[x].selected = "sele cted";
+          s[x].selected = 'selected';
         }
       }
     });
@@ -195,14 +229,18 @@ const Agents = () => {
   }
 
   function clearFilters() {
-    setSelectedColumn("");
-    setSelectedState("");
-    setSelectedCity("");
+    setSearchVal('');
+    setSelectedColumn('');
+    setSelectedState('');
+    setSelectedCity('');
     setSelectedPerPage(50);
-    document.getElementById("searchDropDown").options[0].selected = "selected";
-    document.getElementById("stateDropDown").options[0].selected = "selected";
-    document.getElementById("cityDropDown").options[0].selected = "selected";
-    document.getElementById("perPageDropDown").options[4].selected = "selected";
+    setRefreshData({ ...refreshData, perPage: 50 });
+
+    document.getElementById('inputSearch').value = '';
+    document.getElementById('searchDropDown').options[0].selected = 'selected';
+    document.getElementById('stateDropDown').options[0].selected = 'selected';
+    document.getElementById('cityDropDown').options[0].selected = 'selected';
+    document.getElementById('perPageDropDown').options[4].selected = 'selected';
   }
 
   function sortTable(n) {
@@ -215,9 +253,9 @@ const Agents = () => {
       shouldSwitch,
       dir,
       switchCount = 0;
-    table = document.getElementById("myTable");
+    table = document.getElementById('myTable');
     switching = true;
-    dir = "asc";
+    dir = 'asc';
 
     while (switching) {
       switching = false;
@@ -225,15 +263,15 @@ const Agents = () => {
 
       for (i = 1; i < rows.length - 1; i++) {
         shouldSwitch = false;
-        x = rows[i].getElementsByTagName("TD")[n];
-        y = rows[i + 1].getElementsByTagName("TD")[n];
+        x = rows[i].getElementsByTagName('TD')[n];
+        y = rows[i + 1].getElementsByTagName('TD')[n];
 
-        if (dir === "asc") {
+        if (dir === 'asc') {
           if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
             shouldSwitch = true;
             break;
           }
-        } else if (dir === "desc") {
+        } else if (dir === 'desc') {
           if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
             shouldSwitch = true;
             break;
@@ -246,8 +284,8 @@ const Agents = () => {
         switching = true;
         switchCount++;
       } else {
-        if (switchCount === 0 && dir === "asc") {
-          dir = "desc";
+        if (switchCount === 0 && dir === 'asc') {
+          dir = 'desc';
           switching = true;
         }
       }
@@ -264,7 +302,7 @@ const Agents = () => {
           <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
             <button
               onClick={() => {
-                window.location.href = "/agents/newRecord";
+                window.location.href = '/agents/newRecord';
               }}
               type="button"
               className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
@@ -278,14 +316,15 @@ const Agents = () => {
           <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
             <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
               <div className="mb-2 flex">
-                <label htmlFor="table-search" className="sr-only">
+                <label htmlFor="inputSearch" className="sr-only">
                   Search
                 </label>
                 <div className="flex mr-5">
                   <select
                     id="searchDropDown"
-                    onChange={(e) => setSelectedColumn(e.target.value)}
-                    style={{ width: "8.5rem" }}
+                    value={selectedColumn}
+                    onChange={handleColumnChange}
+                    style={{ width: '8.5rem' }}
                     className="text-sm p-2 text-gray-900 bg-white-500 rounded-tl-md rounded-bl-md border border-gray-300 outline-none"
                   >
                     <option className="font-semibold" value="">
@@ -298,18 +337,18 @@ const Agents = () => {
                     ))}
                   </select>
                   <input
-                    style={{ width: "16rem", borderLeft: "none" }}
+                    style={{ width: '16rem', borderLeft: 'none' }}
                     value={searchVal}
-                    onKeyPress={(e) => handleSearch(e, "")}
+                    onKeyPress={(e) => handleSearch(e, '')}
                     onChange={(e) => handleSearchChange(e)}
                     type="text"
-                    id="table-search"
+                    id="inputSearch"
                     className="relative p-2 pr-10 left-0 text-sm text-gray-900 bg-white-500 border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-800"
                     placeholder="Enter Keywords"
                   />
                   <div
-                    onClick={() => handleSearch([], "btnSearch")}
-                    style={{ borderLeft: "none" }}
+                    onClick={() => handleSearch([], 'btnSearch')}
+                    style={{ borderLeft: 'none' }}
                     className="flex px-2 border border-gray-300 inset-y-0  items-center rounded-tr-md rounded-br-md bg-gray-100 cursor-pointer"
                   >
                     <MagnifyingGlassIcon className="w-5 text-slate-600" />
@@ -317,7 +356,7 @@ const Agents = () => {
                 </div>
 
                 <div
-                  style={{ width: "12rem" }}
+                  style={{ width: '12rem' }}
                   className="mr-5 relative text-left items-center"
                 >
                   <select
@@ -341,11 +380,12 @@ const Agents = () => {
                 </div>
 
                 <div
-                  style={{ width: "12rem" }}
+                  style={{ width: '12rem' }}
                   className="mr-5 relative text-left items-center"
                 >
                   <select
                     id="cityDropDown"
+                    value={selectedCity}
                     onChange={handleCityChange}
                     className="relative w-full cursor-default rounded-lg bg-white py-2 pl-3 pr-10 text-left border-none shadow-md focus:outline-none sm:text-sm"
                   >
@@ -380,7 +420,7 @@ const Agents = () => {
                     onClick={handleExportCSV}
                     type="button"
                     className="rounded-md bg-gray-500 border-none shadow-md focus:outline-none sm:text-sm text-center text-gray-200"
-                    style={{ width: "6rem" }}
+                    style={{ width: '6rem' }}
                   >
                     Export CSV
                   </button>
@@ -391,7 +431,7 @@ const Agents = () => {
                     onClick={clearFilters}
                     type="button"
                     className="underline cursor-pointer mt-2 hover:text-blue-500"
-                    style={{ width: "6rem" }}
+                    style={{ width: '6rem' }}
                   >
                     Clear filters
                   </a>
@@ -399,7 +439,7 @@ const Agents = () => {
 
                 <div
                   className="mr-5 relative text-left w-30 items-center"
-                  style={{ display: "none" }}
+                  style={{ display: 'none' }}
                 >
                   <Listbox
                     value={selectedPerPage}
@@ -429,8 +469,8 @@ const Agents = () => {
                             className={({ active }) =>
                               `relative cursor-default select-none py-2 pl-10 pr-4 ${
                                 active
-                                  ? "bg-amber-100 text-amber-900"
-                                  : "text-gray-900"
+                                  ? 'bg-amber-100 text-amber-900'
+                                  : 'text-gray-900'
                               }`
                             }
                             value={pPage}
@@ -439,7 +479,7 @@ const Agents = () => {
                               <>
                                 <span
                                   className={`block truncate ${
-                                    selected ? "font-medium" : "font-normal"
+                                    selected ? 'font-medium' : 'font-normal'
                                   }`}
                                 >
                                   {pPage.value}
@@ -463,9 +503,9 @@ const Agents = () => {
               </div>
 
               <div className="mt-5 mb-1">
-                Total results:{" "}
+                Total results:{' '}
                 <span className="font-medium">
-                  {isFetching ? "" : refreshData.total}
+                  {isFetching ? '' : refreshData.total}
                 </span>
               </div>
 
@@ -691,7 +731,7 @@ const Agents = () => {
                               href={
                                 `//` +
                                 agent.email.substring(
-                                  agent.email.indexOf("@") + 1,
+                                  agent.email.indexOf('@') + 1,
                                   agent.email.length
                                 )
                               }
@@ -725,17 +765,17 @@ const Agents = () => {
             >
               <div className="hidden sm:block">
                 <p className="text-sm text-gray-700">
-                  Page <span className="font-medium">{refreshData.page}</span>{" "}
+                  Page <span className="font-medium">{refreshData.page}</span>{' '}
                   of <span className="font-medium">{refreshData.pages}</span>
                   <span className="text-sm ml-2 mr-4">
-                    Go to page{" "}
+                    Go to page{' '}
                     <input
-                      style={{ width: "60px" }}
+                      style={{ width: '60px' }}
                       onChange={(e) => handleChangePage(e.target.value)}
                       type="number"
                       min="1"
                       className="border text-left p-1 rounded-md outline-none focus:border-sky-300"
-                    />{" "}
+                    />{' '}
                   </span>
                 </p>
               </div>
