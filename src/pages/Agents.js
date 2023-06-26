@@ -48,6 +48,7 @@ const Agents = () => {
   const [selectedCity, setSelectedCity] = useState('');
   const [selectedPerPage, setSelectedPerPage] = useState(perPage[4].value);
   const [isFetching, setIsFetching] = useState(false);
+  const [onClearFilters, setOnClearFilters] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const stateParam = urlParams.get('state') ? urlParams.get('state') : '';
   const navigate = useNavigate();
@@ -163,7 +164,13 @@ const Agents = () => {
   useEffect(() => {
     updateUrl();
     getRealtorsData();
-  }, [selectedState, selectedCity, selectedPerPage, refreshData.page]);
+  }, [
+    selectedState,
+    selectedCity,
+    selectedPerPage,
+    refreshData.page,
+    onClearFilters,
+  ]);
 
   function updateUrl() {
     const searchParams = new URLSearchParams();
@@ -181,6 +188,7 @@ const Agents = () => {
       getCitiesData();
     }
     setIsFetching(true);
+    setOnClearFilters(false);
     setAgentList([]);
     getRealtors(
       refreshData.page,
@@ -229,6 +237,7 @@ const Agents = () => {
   }
 
   function clearFilters() {
+    setOnClearFilters(true);
     setSearchVal('');
     setSelectedColumn('');
     setSelectedState('');
