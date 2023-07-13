@@ -49,6 +49,7 @@ const Agents = () => {
   const [selectedPerPage, setSelectedPerPage] = useState(perPage[4].value);
   const [isFetching, setIsFetching] = useState(false);
   const [onClearFilters, setOnClearFilters] = useState(false);
+  const [onFilterDomain, setOnFilterDomain] = useState(false);
   const urlParams = new URLSearchParams(window.location.search);
   const stateParam = urlParams.get('state') ? urlParams.get('state') : '';
   const navigate = useNavigate();
@@ -63,14 +64,12 @@ const Agents = () => {
     if (refreshData.prevPage === null) return;
     refreshData.page = refreshData.prevPage;
     setIsFetching(true);
-    getRealtorsData();
   };
 
   const handleNextPage = () => {
     if (refreshData.nextPage === null) return;
     refreshData.page = refreshData.nextPage;
     setIsFetching(true);
-    getRealtorsData();
   };
 
   const handleColumnChange = (e) => {
@@ -136,6 +135,19 @@ const Agents = () => {
     e.target.disabled = false;
   };
 
+  const getDomainFromEmail = (email) => {
+    return email.substring(email.indexOf('@') + 1, email.length);
+  };
+
+  const handleFilterDomain = (email) => {
+    refreshData.page = 1;
+    setSelectedColumn('email');
+    setSelectedState('');
+    setSelectedCity('');
+    setSearchVal(getDomainFromEmail(email));
+    setOnFilterDomain(true);
+  };
+
   useEffect(() => {
     if (stateParam !== '' && stateParam !== null) {
       const st = stateParam.toUpperCase();
@@ -170,6 +182,7 @@ const Agents = () => {
     selectedPerPage,
     refreshData.page,
     onClearFilters,
+    onFilterDomain,
   ]);
 
   function updateUrl() {
@@ -189,6 +202,7 @@ const Agents = () => {
     }
     setIsFetching(true);
     setOnClearFilters(false);
+    setOnFilterDomain(false);
     setAgentList([]);
     getRealtors(
       refreshData.page,
@@ -243,13 +257,13 @@ const Agents = () => {
     setSelectedState('');
     setSelectedCity('');
     setSelectedPerPage(50);
-    setRefreshData({ ...refreshData, perPage: 50 });
+    setRefreshData({ ...refreshData, perPage: 50, page: 1 });
 
     document.getElementById('inputSearch').value = '';
     document.getElementById('searchDropDown').options[0].selected = 'selected';
     document.getElementById('stateDropDown').options[0].selected = 'selected';
     document.getElementById('cityDropDown').options[0].selected = 'selected';
-    document.getElementById('perPageDropDown').options[4].selected = 'selected';
+    document.getElementById('perPageDropDown').options[1].selected = 'selected';
   }
 
   function sortTable(n) {
@@ -686,6 +700,7 @@ const Agents = () => {
                         </th>
 
                         <th scope="col" className="px-3 py-3.5"></th>
+                        <th scope="col" className="px-3 py-3.5"></th>
 
                         <th
                           scope="col"
@@ -735,15 +750,15 @@ const Agents = () => {
                               {agent.email}
                             </a>
                           </td>
+                          <td
+                            onClick={() => handleFilterDomain(agent.email)}
+                            className="whitespace-nowrap px-3 py-4 text-xs text-yellow-500 hover:text-yellow-600 cursor-pointer"
+                          >
+                            {agent.ttlAgentPerDomain}
+                          </td>
                           <td className="whitespace-nowrap px-3 py-4 text-xs text-white">
                             <a
-                              href={
-                                `//` +
-                                agent.email.substring(
-                                  agent.email.indexOf('@') + 1,
-                                  agent.email.length
-                                )
-                              }
+                              href={`//` + getDomainFromEmail(agent.email)}
                               target="_blank"
                               className="bg-green-500 hover:bg-green-600 hover:text-slate-200 p-1 px-2 rounded-md"
                             >
