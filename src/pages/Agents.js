@@ -1,5 +1,10 @@
 import { useState, useEffect, Fragment } from 'react';
-import { getCities, getRealtors, getStates } from '../api';
+import {
+  getCities,
+  getEmailDomainsCount,
+  getRealtors,
+  getStates,
+} from '../api';
 import {
   CheckIcon,
   ChevronUpDownIcon,
@@ -50,11 +55,12 @@ const Agents = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [onClearFilters, setOnClearFilters] = useState(false);
   const [onFilterDomain, setOnFilterDomain] = useState(false);
+  const [emailDomainsCount, setEmailDomainsCount] = useState({});
   const urlParams = new URLSearchParams(window.location.search);
   const stateParam = urlParams.get('state') ? urlParams.get('state') : '';
   const navigate = useNavigate();
 
-  const handleChangePage = (e) => {
+  const handleChangePage = e => {
     if (e === '0' || e === '') return;
     refreshData.page = e;
     getRealtorsData();
@@ -72,7 +78,7 @@ const Agents = () => {
     setIsFetching(true);
   };
 
-  const handleColumnChange = (e) => {
+  const handleColumnChange = e => {
     const val = e.target.value;
     setSelectedColumn(val);
     updateUrl();
@@ -98,31 +104,31 @@ const Agents = () => {
     }
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = e => {
     const val = e.target.value;
     setSearchVal(val);
   };
 
-  const handleStateChange = (e) => {
+  const handleStateChange = e => {
     const val = e.target.value;
     setSelectedCity('');
     setSelectedState(val);
     refreshData.page = 1;
   };
 
-  const handleCityChange = (e) => {
+  const handleCityChange = e => {
     const val = e.target.value;
     setSelectedCity(val);
   };
 
-  const handleSelectPerPage = (e) => {
+  const handleSelectPerPage = e => {
     const val = e.target.value;
     setSelectedPerPage(val);
     refreshData.perPage = val;
     refreshData.page = 1;
   };
 
-  const handleExportCSV = (e) => {
+  const handleExportCSV = e => {
     if (selectedState === '') return;
     e.target.disabled = true;
     let url =
@@ -135,11 +141,11 @@ const Agents = () => {
     e.target.disabled = false;
   };
 
-  const getDomainFromEmail = (email) => {
+  const getDomainFromEmail = email => {
     return email.substring(email.indexOf('@') + 1, email.length);
   };
 
-  const handleFilterDomain = (email) => {
+  const handleFilterDomain = email => {
     refreshData.page = 1;
     setSelectedColumn('email');
     setSelectedState('');
@@ -147,6 +153,11 @@ const Agents = () => {
     setSearchVal(getDomainFromEmail(email));
     setOnFilterDomain(true);
   };
+
+  const fetchEmailDomainsCount = domains =>
+    getEmailDomainsCount(domains).then(response => {
+      setEmailDomainsCount(response.data);
+    });
 
   useEffect(() => {
     if (stateParam !== '' && stateParam !== null) {
@@ -172,6 +183,23 @@ const Agents = () => {
     }
     getStatesData();
   }, []);
+
+  useEffect(() => {
+    if (agentList.length > 0) {
+      const emailDomainsMap = [];
+
+      for (const agent of agentList) {
+        const agentEmail = agent.email.split('@');
+        const domain = agentEmail[1];
+
+        if (!emailDomainsMap.includes(domain)) {
+          emailDomainsMap.push(domain);
+        }
+      }
+
+      fetchEmailDomainsCount(emailDomainsMap);
+    }
+  }, [agentList]);
 
   useEffect(() => {
     updateUrl();
@@ -212,7 +240,7 @@ const Agents = () => {
       searchVal,
       selectedColumn
     )
-      .then((res) => {
+      .then(res => {
         //console.log(res);
         setIsFetching(false);
         setAgentList(res.data.realtors);
@@ -226,14 +254,14 @@ const Agents = () => {
         });
         setIsFetching(false);
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err);
         //Swal.fire("Error", "Unable to get data!", "error");
       });
   }
 
   function getStatesData() {
-    getStates().then((res) => {
+    getStates().then(res => {
       setStates(res.data.states);
       const s = document.getElementById('stateDropDown');
       for (var x = 0; x < s.length; x++) {
@@ -245,7 +273,7 @@ const Agents = () => {
   }
 
   function getCitiesData() {
-    getCities(selectedState).then((res) => {
+    getCities(selectedState).then(res => {
       setCities(res.data.cities);
     });
   }
@@ -362,8 +390,8 @@ const Agents = () => {
                   <input
                     style={{ width: '16rem', borderLeft: 'none' }}
                     value={searchVal}
-                    onKeyPress={(e) => handleSearch(e, '')}
-                    onChange={(e) => handleSearchChange(e)}
+                    onKeyPress={e => handleSearch(e, '')}
+                    onChange={e => handleSearchChange(e)}
                     type="text"
                     id="inputSearch"
                     className="relative p-2 pr-10 left-0 text-sm text-gray-900 bg-white-500 border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-800"
@@ -390,7 +418,7 @@ const Agents = () => {
                     <option className="font-semibold" value="">
                       Select State
                     </option>
-                    {states.map((c) => (
+                    {states.map(c => (
                       <option
                         key={c.id}
                         value={c.name}
@@ -415,7 +443,7 @@ const Agents = () => {
                     <option className="font-semibold" value="">
                       Select City
                     </option>
-                    {cities.map((c) => (
+                    {cities.map(c => (
                       <option key={c.id} value={c.name}>
                         {c.name}
                       </option>
@@ -709,72 +737,81 @@ const Agents = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
-                      {agentList.map((agent) => (
-                        <tr key={agent._id} className="hover:bg-gray-100">
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <a
-                              href={`/agents/${agent._id}`}
-                              className="hover:text-blue-500"
+                      {agentList.map(agent => {
+                        const domain = getDomainFromEmail(agent.email);
+                        let numOfAgentsInDomain = '-';
+
+                        if (domain in emailDomainsCount) {
+                          numOfAgentsInDomain = emailDomainsCount[domain];
+                        }
+
+                        return (
+                          <tr key={agent._id} className="hover:bg-gray-100">
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <a
+                                href={`/agents/${agent._id}`}
+                                className="hover:text-blue-500"
+                              >
+                                {agent.firstName}
+                              </a>
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <a
+                                href={`/agents/${agent._id}`}
+                                className="hover:text-blue-500"
+                              >
+                                {agent.lastName}
+                              </a>
+                            </td>
+                            <td className=" px-3 py-4 text-sm text-gray-500">
+                              {agent.officeName}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {agent.officeCity}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {agent.officeState}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {agent.officePhone}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              {agent.cellPhone}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                              <a
+                                className="hover:underline underline-offset-1 hover:text-blue-500"
+                                href={`mailto: ${agent.email}`}
+                              >
+                                {agent.email}
+                              </a>
+                            </td>
+                            <td
+                              onClick={() => handleFilterDomain(agent.email)}
+                              className="whitespace-nowrap px-3 py-4 text-xs text-yellow-500 hover:text-yellow-600 cursor-pointer"
                             >
-                              {agent.firstName}
-                            </a>
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <a
-                              href={`/agents/${agent._id}`}
-                              className="hover:text-blue-500"
-                            >
-                              {agent.lastName}
-                            </a>
-                          </td>
-                          <td className=" px-3 py-4 text-sm text-gray-500">
-                            {agent.officeName}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {agent.officeCity}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {agent.officeState}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {agent.officePhone}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            {agent.cellPhone}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                            <a
-                              className="hover:underline underline-offset-1 hover:text-blue-500"
-                              href={`mailto: ${agent.email}`}
-                            >
-                              {agent.email}
-                            </a>
-                          </td>
-                          <td
-                            onClick={() => handleFilterDomain(agent.email)}
-                            className="whitespace-nowrap px-3 py-4 text-xs text-yellow-500 hover:text-yellow-600 cursor-pointer"
-                          >
-                            {agent.ttlAgentPerDomain}
-                          </td>
-                          <td className="whitespace-nowrap px-3 py-4 text-xs text-white">
-                            <a
-                              href={`//` + getDomainFromEmail(agent.email)}
-                              target="_blank"
-                              className="bg-green-500 hover:bg-green-600 hover:text-slate-200 p-1 px-2 rounded-md"
-                            >
-                              Visit Site
-                            </a>
-                          </td>
-                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                            <a
-                              href={`/agents/${agent._id}`}
-                              className="text-indigo-600 hover:text-indigo-900"
-                            >
-                              View
-                            </a>
-                          </td>
-                        </tr>
-                      ))}
+                              {numOfAgentsInDomain.toLocaleString()}
+                            </td>
+                            <td className="whitespace-nowrap px-3 py-4 text-xs text-white">
+                              <a
+                                href={`//` + getDomainFromEmail(agent.email)}
+                                target="_blank"
+                                className="bg-green-500 hover:bg-green-600 hover:text-slate-200 p-1 px-2 rounded-md"
+                              >
+                                Visit Site
+                              </a>
+                            </td>
+                            <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                              <a
+                                href={`/agents/${agent._id}`}
+                                className="text-indigo-600 hover:text-indigo-900"
+                              >
+                                View
+                              </a>
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -795,7 +832,7 @@ const Agents = () => {
                     Go to page{' '}
                     <input
                       style={{ width: '60px' }}
-                      onChange={(e) => handleChangePage(e.target.value)}
+                      onChange={e => handleChangePage(e.target.value)}
                       type="number"
                       min="1"
                       className="border text-left p-1 rounded-md outline-none focus:border-sky-300"
