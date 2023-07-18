@@ -60,7 +60,7 @@ const Agents = () => {
   const stateParam = urlParams.get('state') ? urlParams.get('state') : '';
   const navigate = useNavigate();
 
-  const handleChangePage = e => {
+  const handleChangePage = (e) => {
     if (e === '0' || e === '') return;
     refreshData.page = e;
     getRealtorsData();
@@ -78,7 +78,7 @@ const Agents = () => {
     setIsFetching(true);
   };
 
-  const handleColumnChange = e => {
+  const handleColumnChange = (e) => {
     const val = e.target.value;
     setSelectedColumn(val);
     updateUrl();
@@ -104,31 +104,31 @@ const Agents = () => {
     }
   };
 
-  const handleSearchChange = e => {
+  const handleSearchChange = (e) => {
     const val = e.target.value;
     setSearchVal(val);
   };
 
-  const handleStateChange = e => {
+  const handleStateChange = (e) => {
     const val = e.target.value;
     setSelectedCity('');
     setSelectedState(val);
     refreshData.page = 1;
   };
 
-  const handleCityChange = e => {
+  const handleCityChange = (e) => {
     const val = e.target.value;
     setSelectedCity(val);
   };
 
-  const handleSelectPerPage = e => {
+  const handleSelectPerPage = (e) => {
     const val = e.target.value;
     setSelectedPerPage(val);
     refreshData.perPage = val;
     refreshData.page = 1;
   };
 
-  const handleExportCSV = e => {
+  const handleExportCSV = (e) => {
     if (selectedState === '') return;
     e.target.disabled = true;
     let url =
@@ -141,11 +141,11 @@ const Agents = () => {
     e.target.disabled = false;
   };
 
-  const getDomainFromEmail = email => {
+  const getDomainFromEmail = (email) => {
     return email.substring(email.indexOf('@') + 1, email.length);
   };
 
-  const handleFilterDomain = email => {
+  const handleFilterDomain = (email) => {
     refreshData.page = 1;
     setSelectedColumn('email');
     setSelectedState('');
@@ -154,8 +154,8 @@ const Agents = () => {
     setOnFilterDomain(true);
   };
 
-  const fetchEmailDomainsCount = domains =>
-    getEmailDomainsCount(domains).then(response => {
+  const fetchEmailDomainsCount = (domains) =>
+    getEmailDomainsCount(domains).then((response) => {
       setEmailDomainsCount(response.data);
     });
 
@@ -240,7 +240,7 @@ const Agents = () => {
       searchVal,
       selectedColumn
     )
-      .then(res => {
+      .then((res) => {
         //console.log(res);
         setIsFetching(false);
         setAgentList(res.data.realtors);
@@ -254,14 +254,14 @@ const Agents = () => {
         });
         setIsFetching(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.log(err);
         //Swal.fire("Error", "Unable to get data!", "error");
       });
   }
 
   function getStatesData() {
-    getStates().then(res => {
+    getStates().then((res) => {
       setStates(res.data.states);
       const s = document.getElementById('stateDropDown');
       for (var x = 0; x < s.length; x++) {
@@ -273,7 +273,7 @@ const Agents = () => {
   }
 
   function getCitiesData() {
-    getCities(selectedState).then(res => {
+    getCities(selectedState).then((res) => {
       setCities(res.data.cities);
     });
   }
@@ -390,8 +390,8 @@ const Agents = () => {
                   <input
                     style={{ width: '16rem', borderLeft: 'none' }}
                     value={searchVal}
-                    onKeyPress={e => handleSearch(e, '')}
-                    onChange={e => handleSearchChange(e)}
+                    onKeyPress={(e) => handleSearch(e, '')}
+                    onChange={(e) => handleSearchChange(e)}
                     type="text"
                     id="inputSearch"
                     className="relative p-2 pr-10 left-0 text-sm text-gray-900 bg-white-500 border border-gray-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-indigo-800"
@@ -418,7 +418,7 @@ const Agents = () => {
                     <option className="font-semibold" value="">
                       Select State
                     </option>
-                    {states.map(c => (
+                    {states.map((c) => (
                       <option
                         key={c.id}
                         value={c.name}
@@ -443,7 +443,7 @@ const Agents = () => {
                     <option className="font-semibold" value="">
                       Select City
                     </option>
-                    {cities.map(c => (
+                    {cities.map((c) => (
                       <option key={c.id} value={c.name}>
                         {c.name}
                       </option>
@@ -737,7 +737,7 @@ const Agents = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-200 bg-white">
-                      {agentList.map(agent => {
+                      {agentList.map((agent) => {
                         const domain = getDomainFromEmail(agent.email);
                         let numOfAgentsInDomain = '-';
 
@@ -788,7 +788,7 @@ const Agents = () => {
                             </td>
                             <td
                               onClick={() => handleFilterDomain(agent.email)}
-                              className="whitespace-nowrap px-3 py-4 text-xs text-yellow-500 hover:text-yellow-600 cursor-pointer"
+                              className="whitespace-nowrap px-3 py-4 text-sm text-yellow-500 hover:text-yellow-600 cursor-pointer"
                             >
                               {numOfAgentsInDomain.toLocaleString()}
                             </td>
@@ -832,7 +832,7 @@ const Agents = () => {
                     Go to page{' '}
                     <input
                       style={{ width: '60px' }}
-                      onChange={e => handleChangePage(e.target.value)}
+                      onChange={(e) => handleChangePage(e.target.value)}
                       type="number"
                       min="1"
                       className="border text-left p-1 rounded-md outline-none focus:border-sky-300"
