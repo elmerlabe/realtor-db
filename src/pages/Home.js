@@ -27,27 +27,42 @@ const Home = () => {
   const [dbSummary, setDbSummary] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
   const [agentsPerState, setAgentsPerState] = useState({});
+  const [fetchCounter, setFetchCounter] = useState(1);
 
   const fetchStateAgentsCount = (states) => {
     getStateAgentsCount(states).then((res) => {
       setAgentsPerState(res.data);
-      setIsFetching(false);
+      setFetchCounter(fetchCounter + 1);
+      if (fetchCounter === 3) setIsFetching(false);
     });
   };
 
   useEffect(() => {
-    getDatabaseSummary().then((res) => {
-      const d = res.data;
-      console.log(d);
-      setDbSummary([d.agents, d.emails, d.phones]);
-    });
-
     const states = [];
 
-    States.map((state) => {
-      states.push(state.name);
+    if (fetchCounter == 1) {
+      for (let i = 0; i < 20; i++) {
+        states.push(States[i].name);
+      }
+      fetchStateAgentsCount(states);
+    } else if (fetchCounter == 2) {
+      for (let i = 20; i < 40; i++) {
+        states.push(States[i].name);
+      }
+      fetchStateAgentsCount(states);
+    } else if (fetchCounter == 3) {
+      for (let i = 40; i < States.length; i++) {
+        states.push(States[i].name);
+      }
+      fetchStateAgentsCount(states);
+    }
+  }, [fetchCounter]);
+
+  useEffect(() => {
+    getDatabaseSummary().then((res) => {
+      const d = res.data;
+      setDbSummary([d.agents, d.emails, d.phones]);
     });
-    fetchStateAgentsCount(states);
   }, []);
 
   function sortTable(n, type) {
