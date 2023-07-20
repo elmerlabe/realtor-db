@@ -26,42 +26,29 @@ const cards = [
 const Home = () => {
   const [dbSummary, setDbSummary] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
-  const [agentsPerState, setAgentsPerState] = useState({});
-  const [fetchCounter, setFetchCounter] = useState(1);
-
-  const fetchStateAgentsCount = (states) => {
-    getStateAgentsCount(states).then((res) => {
-      setAgentsPerState(res.data);
-      setFetchCounter(fetchCounter + 1);
-      if (fetchCounter === 3) setIsFetching(false);
-    });
-  };
-
-  useEffect(() => {
-    const states = [];
-
-    if (fetchCounter == 1) {
-      for (let i = 0; i < 20; i++) {
-        states.push(States[i].name);
-      }
-      fetchStateAgentsCount(states);
-    } else if (fetchCounter == 2) {
-      for (let i = 20; i < 40; i++) {
-        states.push(States[i].name);
-      }
-      fetchStateAgentsCount(states);
-    } else if (fetchCounter == 3) {
-      for (let i = 40; i < States.length; i++) {
-        states.push(States[i].name);
-      }
-      fetchStateAgentsCount(states);
-    }
-  }, [fetchCounter]);
+  const [agentsPerState, setAgentsPerState] = useState([]);
 
   useEffect(() => {
     getDatabaseSummary().then((res) => {
       const d = res.data;
       setDbSummary([d.agents, d.emails, d.phones]);
+    });
+
+    States.map((state, i) => {
+      getAgentsPerState(state.name).then((res) => {
+        agentsPerState[i] = res.data.ttlAgentPerState;
+
+        if (agentsPerState.length === States.length) setIsFetching(false);
+        const table = document.getElementById('myTable');
+        const rows = table.rows;
+
+        for (let i = 1; i < agentsPerState.length + 1; i++) {
+          if (agentsPerState[i - 1] !== undefined) {
+            let x = rows[i].getElementsByTagName('td')[2];
+            x.innerHTML = agentsPerState[i - 1];
+          }
+        }
+      });
     });
   }, []);
 
@@ -230,32 +217,24 @@ const Home = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200 bg-white">
-                        {States.map((state, i) => {
-                          let stateAgentsCount = '--';
-
-                          if (state.name in agentsPerState) {
-                            stateAgentsCount = agentsPerState[state.name];
-                          }
-
-                          return (
-                            <tr key={i} className="hover:bg-gray-100">
-                              <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                                <a
-                                  href={'/agents?state=' + state.name}
-                                  className="hover:text-blue-500"
-                                >
-                                  {state.longName}
-                                </a>
-                              </td>
-                              <td className="md:w-1/2 max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
-                                {state.name}
-                              </td>
-                              <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900 font-semibold">
-                                {stateAgentsCount}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        {States.map((state, i) => (
+                          <tr key={i} className="hover:bg-gray-100">
+                            <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                              <a
+                                href={'/agents?state=' + state.name}
+                                className="hover:text-blue-500"
+                              >
+                                {state.longName}
+                              </a>
+                            </td>
+                            <td className="md:w-1/2 max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900">
+                              {state.name}
+                            </td>
+                            <td className="w-auto max-w-0 whitespace-nowrap px-6 py-4 text-sm text-gray-900 font-semibold">
+                              --
+                            </td>
+                          </tr>
+                        ))}
                       </tbody>
                     </table>
                   </div>
