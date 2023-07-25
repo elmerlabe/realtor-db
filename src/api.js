@@ -67,3 +67,5 @@ export const getEmailDomainsCount = (domains) =>
 
 export const getStateAgentsCount = (states) =>
   apiInstance.post('/getStateAgentsCount', { states });
+
+export const getDomains = () => apiInstance.get('/getDomains');

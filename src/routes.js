@@ -1,47 +1,52 @@
-import { createBrowserRouter } from "react-router-dom";
-import Login from "./pages/Login";
-import Logout from "./pages/Logout";
-import Agents from "./pages/Agents";
-import NewAgent from "./components/NewRecord";
-import Account from "./pages/Account";
-import NewRecord from "./components/NewRecord";
-import Home from "./pages/Home";
-import RequireAuth from "./components/RequireAuth";
+import { createBrowserRouter } from 'react-router-dom';
+import Login from './pages/Login';
+import Logout from './pages/Logout';
+import Agents from './pages/Agents';
+import NewAgent from './components/NewRecord';
+import Account from './pages/Account';
+import NewRecord from './components/NewRecord';
+import Home from './pages/Home';
+import RequireAuth from './components/RequireAuth';
+import Domains from './pages/Domains';
 
 const routes = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     children: [
       {
         index: true,
         element: <RequireAuth children={<Home />} />,
       },
       {
-        path: "/login",
+        path: '/login',
         element: <Login />,
       },
       {
-        path: "/logout",
+        path: '/logout',
         element: <Logout />,
       },
       {
-        path: "/agents",
+        path: '/agents',
         element: <RequireAuth children={<Agents />} />,
       },
       {
-        path: "/agents/newRecord",
+        path: '/domains',
+        element: <RequireAuth children={<Domains />} />,
+      },
+      {
+        path: '/agents/newRecord',
         element: <RequireAuth children={<NewAgent />} />,
       },
       {
-        path: "/agents/:agentId",
+        path: '/agents/:agentId',
         element: <RequireAuth children={<NewRecord />} />,
       },
       {
-        path: "/account",
+        path: '/account',
         element: <RequireAuth children={<Account />} />,
       },
       {
-        path: "/home",
+        path: '/home',
         element: <RequireAuth children={<Home />} />,
       },
     ],
