@@ -8,6 +8,8 @@ const Domains = () => {
   const [isFetching, setIsFetching] = useState(false);
   const [isDescAgent, setIsDescAgent] = useState(true);
   const [isDescDomain, setIsDescDomain] = useState(false);
+  const [paginatedData, setPaginatedData] = useState({});
+  const [data, setData] = useState({ page: 1, per_page: 50 });
 
   const fetchDomains = () => {
     setIsFetching(true);
@@ -22,10 +24,10 @@ const Domains = () => {
 
   const sortTable = (col) => {
     let sorted = {};
-    setDomains({});
+    setPaginatedData({});
     if (col === 1) {
       sorted = Object.fromEntries(
-        Object.entries(domains).sort((a, b) => {
+        Object.entries(paginatedData).sort((a, b) => {
           if (isDescDomain) {
             return a < b ? -1 : 1;
           } else {
@@ -36,7 +38,7 @@ const Domains = () => {
       setIsDescDomain(!isDescDomain);
     } else if (col === 2) {
       sorted = Object.fromEntries(
-        Object.entries(domains).sort(([, a], [, b]) => {
+        Object.entries(paginatedData).sort(([, a], [, b]) => {
           if (isDescAgent) {
             return a - b;
           } else {
@@ -47,8 +49,35 @@ const Domains = () => {
       setIsDescAgent(!isDescAgent);
     }
 
-    setDomains(sorted);
+    setPaginatedData(sorted);
   };
+
+  const getTotalPages = () => {
+    return Math.ceil(Object.entries(domains).length / data.per_page);
+  };
+
+  const nextPage = () => {
+    if (data.page < getTotalPages()) setData({ ...data, page: data.page + 1 });
+  };
+
+  const prevPage = () => {
+    if (data.page > 1) setData({ ...data, page: data.page - 1 });
+  };
+
+  useEffect(() => {
+    let obj = {};
+    const arrayDomain = Object.entries(domains);
+
+    for (
+      let i = (data.page - 1) * data.per_page;
+      i < data.page * data.per_page && i < arrayDomain.length;
+      i++
+    ) {
+      obj[arrayDomain[i][0]] = arrayDomain[i][1];
+    }
+
+    setPaginatedData(obj);
+  }, [data, domains]);
 
   useEffect(() => {
     fetchDomains();
@@ -65,7 +94,13 @@ const Domains = () => {
           </div>
         ) : (
           <div>
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+            <span>
+              Total results:
+              <span className="ml-1 font-semibold">
+                {Object.entries(domains).length}
+              </span>
+            </span>
+            <div className="mt-1 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
               <table
                 id="myTable"
                 className="min-w-full divide-y divide-gray-300"
@@ -104,7 +139,7 @@ const Domains = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {Object.keys(domains).map((key, index) => {
+                  {Object.keys(paginatedData).map((key, index) => {
                     const domain = key;
                     const agents = domains[key];
 
@@ -136,6 +171,26 @@ const Domains = () => {
                   })}
                 </tbody>
               </table>
+            </div>
+            <div className="mt-2 flex items-center justify-between">
+              <span className="mr-5">
+                Page {data.page} of {getTotalPages()}
+              </span>
+
+              <div>
+                <button
+                  onClick={prevPage}
+                  className="p-2 px-5 bg-white mr-3 shadow rounded-md text-sm text-gray-500 hover:font-semibold"
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={nextPage}
+                  className="p-2 px-5 bg-white shadow rounded-md text-sm text-gray-500 hover:font-semibold"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         )}
