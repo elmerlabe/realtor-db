@@ -68,11 +68,7 @@ const Domains = () => {
     let obj = {};
     const arrayDomain = Object.entries(domains);
 
-    for (
-      let i = (data.page - 1) * data.per_page;
-      i < data.page * data.per_page && i < arrayDomain.length;
-      i++
-    ) {
+    for (let i = (data.page - 1) * data.per_page; i < data.page * data.per_page && i < arrayDomain.length; i++) {
       obj[arrayDomain[i][0]] = arrayDomain[i][1];
     }
 
