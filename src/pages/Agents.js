@@ -556,7 +556,7 @@ const Agents = () => {
               <div className="mt-5 mb-1">
                 Total results:{' '}
                 <span className="font-medium">
-                  {isFetching ? '' : refreshData.total}
+                  {isFetching ? '' : refreshData.total.toLocaleString()}
                 </span>
               </div>
 

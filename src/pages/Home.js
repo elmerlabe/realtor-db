@@ -142,7 +142,9 @@ const Home = () => {
                             {card.name}
                           </dt>
                           <dd className="font-semibold text-lg">
-                            {dbSummary.length !== 0 ? dbSummary[i] : '---'}
+                            {dbSummary.length !== 0
+                              ? dbSummary[i].toLocaleString()
+                              : '---'}
                           </dd>
                         </dl>
                       </div>
